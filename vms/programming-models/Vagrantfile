@@ -1,0 +1,25 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+Vagrant.configure(2) do |config|
+  config.vm.box = "bento/ubuntu-14.04"
+  config.vm.hostname = "dursi-nextgen-hpc"
+
+  config.vm.network "forwarded_port", guest: 9999, host: 9999, auto_correct: true
+  config.vm.network "forwarded_port", guest: 9998, host: 9998, auto_correct: true
+
+  config.vm.network "private_network", ip: "192.168.33.10"
+  config.ssh.forward_agent = true
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "4096"
+    vb.gui = true
+    vb.name =  "Dursi Nextgen HPC Programming Models VM" 
+    vb.cpus = 2
+  end
+
+#  config.push.define "atlas" do |push|
+#    push.app = "ljdursi/eurompi16_programming"
+#  end
+
+  config.vm.provision :shell, path: "install-sw.sh"
+end

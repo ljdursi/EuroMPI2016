@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Finding MPI's Place In 2016</title>
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Average);
+      @import url(https://fonts.googleapis.com/css?family=Oswald);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {
+        font-family: 'Average';
+      }
+      h1, h2, h3 {
+        font-family: 'Oswald';
+        font-weight: 400;
+        color: #348e28;
+        margin-bottom: 0;
+      }
+      .remark-slide-content h1 { font-size: 2.2em; }
+      .remark-slide-content h2 { font-size: 1.6em; }
+      .remark-slide-content h3 { font-size: 1.2em; }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+      }
+      li p { line-height: 1.25em; }
+      .red { color: #fa0000; }
+      .black { color: #000000; }
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        background: #e7e8e2;
+        border-radius: 5px;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code-line-highlighted     { background-color: #373832; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #348e28;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .title {
+        background: #ffffff;
+        background-image: url(assets/Footer.png);
+        background-position: bottom;
+        background-repeat: no-repeat;
+        background-size: contain;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+
+      .left-column h2,h3 {
+          color: #000;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #348e28;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+        padding-bottom: 0em;
+      }
+      .right-column-cont {
+        width: 75%;
+        float: right;
+        padding-top: 0em;
+        margin-top: -1em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+name: title
+layout: true
+class: center, middle, title
+count: false
+---
+##Finding MPI's Place In Today's Big Computing
+Jonathan Dursi<br/>
+Senior Research Associate<br/>
+Centre for Computational Medicine<br/>
+The Hospital for Sick Children
+---
+name: my-background-1
+layout: false
+.left-column[
+  ## Who Am I?
+
+  ### Old HPC Hand...
+]
+.right-column[
+  Ex-astrophysicist turned large-scale computing.
+
+- Large-scale high-speed adaptive reactive fluid fluids
+
+- DOE ASCI Center at Chicago
+    - ASCI Red
+    - ASCI Blue
+    - ASCI White
+
+- FORTRAN, MPI, Oct-tree regular adaptive mesh
+]
+
+???
+Before we start, let me tell you a little about where I'm coming
+from.  This story is probably pretty familiar to many of you - I
+started off doing science with computing, and ended up drifting to
+the other side of that divide, doing computing to support science.
+
+I was doing pretty pretty standard HPC stuff - high speed flows
+(so explicit methods), reactive, adaptive grid, FORTRAN with some
+C and python, that sort of thing. 
+
+--
+.right-column-cont[
+- Joined HPC centre after postdoc
+
+- Worked with researchers on wide variety of problems
+
+- Got interested in genomics:
+    - Large computing needs
+    - Very interesting algorithmic challenges
+]
+???
+After doing a postdoc in Toronto, I moved into the HPC Centre
+there, working with them and Compute Canada - a little like 
+PRACE or XSEDE - and working with a lot of different researchers
+doing a lot of different problems.  Before too long, I started
+becoming interested in genomics - partly because it was the new
+frontier, with fascinating and deep algorithmic challenges, but
+also required very large-scale computing to accomplish its promise.
+---
+name: my-background-2
+layout: false
+.left-column[
+  ## Who Am I?
+
+  ### Old HPC Hand...
+
+  ### Gone Into Genomics
+]
+.right-column[
+Started looking into Genomics in ~2013, made move in 2014
+
+- Ontario Institute for Cancer Research
+
+- Working with Jared Simpson, author of ABySS (amongst other things)
+    - First open-source human-scale de novo genome assembler
+    - MPI-based 
+]
+???
+I began working in genomics with Jared Simpson, who amongst other
+accomplishments was the author of ABySS, one of the very early
+large-scale de novo genome assemblers from what we now call short
+reads.  It tackled large - including human - genomes by using
+distributed memory, using MPI.  So it sounds like I found a pretty
+good niche in Genomics for an HPCer, right?
+--
+.right-column-cont[
+    - "Never Again"
+
+- ABySS 2.0 just came out, with a new non-MPI mode
+]
+???
+Not quite.
+
+ABySS 2.0 just came out, with a new non-MPI mode which will almost
+certainly become the default after the kinks are worked out.  There
+are absolutely no plans by any of the development team to develop
+new MPI-based algorithms or tools
+---
+name: my-background-2
+layout: false
+.left-column[
+  ## Who Am I?
+
+  ### Old HPC Hand...
+
+  ### Gone Into Genomics
+]
+.right-column[
+In the meantime, one of the leading standards for genome analysis, GATK, 
+has just announced that version 4 will support distributed cluster computing &mdash; 
+using Apache Spark.
+
+<img src="gatk-spark-news.png" width=75%>
+]
+???
+In the meantime, one of the leading standards for genome analysis, GATK, 
+has just announced that version 4 will support distributed cluster computing &mdash; 
+using Apache Spark.
+---
+name: begin
+layout: false
+class: center, middle, inverse
+## MPI's Place In Big Computing Is Small, and Getting Smaller
+???
+How did we get here?  This is the background I'm coming from when
+I talk about MPI's place in modern big computing - even big scientific
+computing.  In the broader sweep of large technical computing, MPI's
+place is small, and getting smaller.
+---
+layout: false
+.left-column[
+  ## Top500 vs The Cloud
+
+  ### 2013
+]
+.right-column[
+.right[<img src="2013-top500-hyperscalers.png" width=75%>]
+]
+???
+You can see this when looking at who is computing and where they
+are doing their computations - when I started looking at big
+scientific computing more broadly in 2013, the top500, where most
+MPI tasks are run, was already starting to be a fairly small fraction
+of the available computing out there...
+---
+layout: false
+.left-column[
+  ## Top500 vs The Cloud
+
+  ### 2013
+
+  ### 2016
+]
+.right-column[
+.right[<img src="2016-top500-hyperscalers.png" width=75%>]
+]
+???
+And it's only gotten smaller as time goes on. 
+---
+name: begin
+layout: false
+class: center, middle, inverse
+### MPI's Place In Big Computing Is Small, and Getting Smaller
+## but it doesn't have to be this way
+???
+The underlying reason is _good_ _news_ &mdash; this is the most exciting period
+of time ever in large-scale computing, with new disciplines, new data sources,
+and new types of hardware sprouting up everywhere in just a decade.  There's
+so much to do!
+
+During this big-computing cambrian explosion we're experiencing, MPI's "steadfastness"
+has been welcome but is holding it back from being part of this growth.  But that
+need not be the case - the MPI community broadly has much to learn and much to
+contribute to these other models **if it chooses to do so**.  
+---
+layout: false
+.left-column[
+  ## Outline
+]
+.right-column[
+- A tour of some common big-data computing problems
+    - Genomics and otherwise
+    - Not so different from complex simulations
+
+- A tour of programming models to tackle them
+    - Spark
+    - Dask
+    - Distributed Tensorflow
+    - Chapel
+
+- A tour of data layers the models are built on
+    - Akka
+    - Data Plane Development Kit
+    - Libfabric/UCX
+    - GASNET
+
+- Where MPI is: programming model at the data layer
+
+- Where MPI can be
+]
+???
+It's very difficult to describe what place MPI occupies in the
+landscape without drawing a map, so what I want to do for the beginning
+of our time together is to walk through these new territories with you.
+
+I want to talk about some common big data analysis tasks and point
+out how similar they are to familiar simulation tasks.  Then I'd
+like to show some of the programming models that are springing up -
+both outside of HPC and within it - are tackling these problems.
+
+These higher level programming models themselves take advantage of
+lower-level communications frameworks to implement the distributed
+computation.  Understanding what these frameworks provide and how
+they enable the higher level models is crucial to understanding 
+MPI's potential role.
+
+Once we've sketched out the map, I want to describe the place I see
+MPI as occupying now &mdash; and the attractive neighbouring vacant
+land that we can occupy if we want.
+
+
+    </textarea>
+    <script src="https://gnab.github.io/remark/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
