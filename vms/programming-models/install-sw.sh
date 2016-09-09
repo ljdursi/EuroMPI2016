@@ -36,7 +36,9 @@ echo "Jupyter install"
 # Dask
 echo "Dask install"
 /miniconda/bin/conda install -y dask -c conda-forge
+/miniconda/bin/conda install -y graphviz
 /miniconda/bin/pip install dask[complete]
+/miniconda/bin/pip install graphviz
 
 # Hadoop
 echo "Hodoop install"
