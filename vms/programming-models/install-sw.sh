@@ -2,7 +2,7 @@
 sudo apt-get update -y
 sudo apt-get install -y git
 sudo apt-get install -y make
-sudo apt-get install -y openjdk-8-jre-headless 
+sudo apt-get install -y openjdk-7-jre-headless 
 sudo apt-get install -y scala
 sudo apt-get install -y vim nano emacs  # yes, even emacs
 
@@ -80,7 +80,7 @@ jupyter toree install --spark_home=${SPARK_HOME}
 
 # install graphframes
 cd "${BASEDIR}"
-"$SPARK_HOME/bin/spark-shell" --packages graphframes:graphframes:0.2.0-spark2.0-s_2.11 <<EOF
+"$SPARK_HOME/bin/spark-shell" --packages graphframes:graphframes:0.2.0-spark1.6-s_2.10 <<EOF
 EOF
 rm "${BASEDIR}/derby.log"
 
@@ -129,8 +129,8 @@ do
    cp -r EuroMPI2016/${dir} ${BASEDIR}
    chown -R ${USER}.${GROUP} ${BASEDIR}/${dir}
 done
-sudo cp ${BASEDIR}/EuroMPI2016/vms/programming-models/shellinabox /etc/init.d
-sudo cp ${BASEDIR}/EuroMPI2016/vms/programming-models/jupyter /etc/init.d
+sudo mv ${BASEDIR}/EuroMPI2016/vms/programming-models/shellinabox /etc/init.d
+sudo mv ${BASEDIR}/EuroMPI2016/vms/programming-models/jupyter /etc/init.d
 chmod 755 /etc/init.d/{jupyter,shellinabox}
 sudo update-rc.d shellinabox  defaults
 sudo update-rc.d jupyter  defaults
