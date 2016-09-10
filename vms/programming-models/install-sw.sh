@@ -129,8 +129,8 @@ do
    cp -r EuroMPI2016/${dir} ${BASEDIR}
    chown -R ${USER}.${GROUP} ${BASEDIR}/${dir}
 done
-sudo cp ${BASEDIR}/EuroMPI2016/vm/programming-models/shellinabox /etc/init.d
-sudo cp ${BASEDIR}/EuroMPI2016/vm/programming-models/jupyter /etc/init.d
+sudo cp ${BASEDIR}/EuroMPI2016/vms/programming-models/shellinabox /etc/init.d
+sudo cp ${BASEDIR}/EuroMPI2016/vms/programming-models/jupyter /etc/init.d
 chmod 755 /etc/init.d/{jupyter,shellinabox}
 sudo update-rc.d shellinabox  defaults
 sudo update-rc.d jupyter  defaults
