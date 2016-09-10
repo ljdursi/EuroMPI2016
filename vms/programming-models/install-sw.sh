@@ -122,19 +122,19 @@ fi
 
 # Examples
 cd ${BASEDIR}
-git clone https://github.com/ljdursi/Spark-Chapel-TF-UMich-2016.git
-chown -R ${USER}.${GROUP} Spark-Chapel-TF-UMich-2016
+git clone https://github.com/ljdursi/EuroMPI2016.git
+chown -R ${USER}.${GROUP} EuroMPI2016
 for dir in bin examples hadoop-config
 do
-   cp -r Spark-Chapel-TF-UMich-2016/${dir} ${BASEDIR}
+   cp -r EuroMPI2016/${dir} ${BASEDIR}
    chown -R ${USER}.${GROUP} ${BASEDIR}/${dir}
 done
-sudo cp ${BASEDIR}/Spark-Chapel-TF-UMich-2016/vm/shellinabox /etc/init.d
-sudo cp ${BASEDIR}/Spark-Chapel-TF-UMich-2016/vm/jupyter /etc/init.d
+sudo cp ${BASEDIR}/EuroMPI2016/vm/programming-models/shellinabox /etc/init.d
+sudo cp ${BASEDIR}/EuroMPI2016/vm/programming-models/jupyter /etc/init.d
 chmod 755 /etc/init.d/{jupyter,shellinabox}
 sudo update-rc.d shellinabox  defaults
 sudo update-rc.d jupyter  defaults
-rm -rf Spark-Chapel-TF-UMich-2016
+rm -rf EuroMPI2016
 chown -R ${USER}.${GROUP} ${BASEDIR}/examples
 
 echo "source ~/bin/setup.sh" >> ${BASHRC}
