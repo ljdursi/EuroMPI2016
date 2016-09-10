@@ -11,14 +11,14 @@
 
 # Based on the template from https://github.com/fhd/init-script-template
 
-dir="~vagrant/examples"
-cmd="/miniconda/bin/jupyter notebook --port 9999 --no-browser --notebook-dir=~vagrant/examples --ip=192.168.33.10"
-user="root"
+readonly dir="~vagrant/examples"
+readonly cmd="/miniconda/bin/jupyter notebook --port 9999 --no-browser --notebook-dir=~vagrant/examples --ip=192.168.33.10"
+readonly user="root"
 
-name=`basename $0`
-pid_file="/var/run/$name.pid"
-stdout_log="/var/log/$name.log"
-stderr_log="/var/log/$name.err"
+readonly name=`basename $0`
+readonly pid_file="/var/run/$name.pid"
+readonly stdout_log="/var/log/$name.log"
+readonly stderr_log="/var/log/$name.err"
 
 get_pid() {
     cat "$pid_file"

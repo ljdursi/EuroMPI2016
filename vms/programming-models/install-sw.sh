@@ -135,7 +135,6 @@ chmod 755 /etc/init.d/{jupyter,shellinabox}
 sudo update-rc.d shellinabox  defaults
 sudo update-rc.d jupyter  defaults
 rm -rf Spark-Chapel-TF-UMich-2016
-cp -r ${BASEDIR}/examples ${BASEDIR}/examples
 chown -R ${USER}.${GROUP} ${BASEDIR}/examples
 
 echo "source ~/bin/setup.sh" >> ${BASHRC}
