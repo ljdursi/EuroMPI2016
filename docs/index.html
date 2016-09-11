@@ -72,6 +72,10 @@
         color: #f3f3f3;
         line-height: 0.8em;
       }
+      .inverse a {
+        color: #a3a3f3;
+        text-decoration: none;
+      }
 
       /* Slide-specific styling */
       #slide-inverse .footnote {
@@ -326,7 +330,7 @@ layout: false
 - A tour of programming models to tackle them
     - Spark
     - Dask
-    - Distributed Tensorflow
+    - Distributed TensorFlow
     - Chapel
 
 - A tour of data layers the models are built on
@@ -358,7 +362,541 @@ MPI's potential role.
 Once we've sketched out the map, I want to describe the place I see
 MPI as occupying now &mdash; and the attractive neighbouring vacant
 land that we can occupy if we want.
+---
+layout: false
+class: center, middle, inverse
+## The Problems Big Data Frameworks Aim To Solve
+---
+layout: false
+class: center, middle, inverse
+## Other Programming Models
+---
+layout: false
+class: center, middle, inverse
 
+## Spark: http://spark.apache.com
+
+---
+.left-column[
+## Spark
+
+### Overview
+]
+.right-column[
+Hadoop came out in ~2006 with MapReduce as a computational engine, which wasn't that useful for scientific computation.
+
+* One pass through data
+* Going back to disk every iteration
+
+However, the ecosystem flourished, particularly around the Hadoop file system (HDFS) and new databases
+and processing packages that grew up around it.
+]
+---
+.left-column[
+## Spark
+
+### Overview
+]
+.right-column[
+Spark is in some ways "post-Hadoop"; it can happily interact with the Hadoop stack but doesn't require it.
+
+Built around concept of resilient distributed datasets
+
+* Tables of rows, distributed across the job, normally in-memory
+* Restricted to certain transformations - map, reduce, join, etc
+* Lineage kept
+* If a node fails, rows recalculated 
+
+<img "assets/img/spark-rdd.png" width=75%></img>
+]
+---
+layout: false
+.left-column[
+## Spark
+
+### Overview
+
+### RDDs
+]
+.right-column[
+Spark RDDs prove to be a very powerful abstraction.
+
+Key-Value RDDs are a special case - a pair of values, first is key, second is value associated with.
+
+Can easily use join, etc to bring all values associated with a key together:
+  - Like all terms that are contribute to a particular point
+  
+Linda tuple spaces, which underly Gaussian.
+
+.center[<img src="assets/img/spark-rdds-diffusion.png" width=60%></img>]
+]
+---
+.left-column[
+## Spark
+
+### Overview
+
+### RDDs
+
+### Execution graphs
+]
+.right-column[
+Operations on Spark RDDs can be:
+* Transformations, like map, filter, join...
+* Actions like collect, foreach, ..
+
+You build a Spark computation by chaining together operations; but no data starts moving until part of the computation is materialized with an action.
+
+<img src="assets/img/spark-rdd.png" width=75%></img>
+]
+---
+.left-column[
+## Spark
+
+### Overview
+
+### RDDs
+
+### Execution graphs
+]
+.right-column[
+Delayed computation + view of entire algorithm allows optimizations over the entire computation graph.
+
+So for instance here, nothing starts happening in earnest until the `plot_data()` (Spark notebook 1)
+
+```python
+    # Main loop: For each iteration,
+    #  - calculate terms in the next step
+    #  - and sum
+    for step in range(nsteps):
+        data = data.flatMap(stencil) \
+                    .reduceByKey(lambda x, y:x+y)
+            
+    # Plot final results in black
+    plot_data(data, usecolor='black')
+```
+]
+---
+.left-column[
+## Spark
+
+### Overview
+
+### RDDs
+
+### Execution graphs
+
+### Dataframes
+]
+.right-column[
+But RDDs are also building blocks.
+
+Spark Data Frames are lists of columns, like pandas or R data frames.
+
+Can use SQL-like queries to perform calculations.  But this allows bringing the entire mature machinery of SQL query optimizers to bear, allowing further automated optimization of data movement, and computation.
+
+<img src="assets/img/spark-dataframes.png" width=75%></img>
+]
+---
+.left-column[
+## Spark
+
+### Overview
+
+### RDDs
+
+### Execution graphs
+
+### Dataframes
+
+### Graphs
+]
+.right-column[
+Using RDDs, a graph library has also been implemented: GraphX.
+
+Many interesting features, but for us: [Pregel](http://blog.acolyer.org/2015/05/26/pregel-a-system-for-large-scale-graph-processing/)-like algorithms on graphs.
+
+Nodes passes messages to their neighbours along edges.
+<img src="assets/img/graphx.png" width=75%></img>
+]
+---
+.left-column[
+## Spark
+
+### Overview
+
+### RDDs
+
+### Execution graphs
+
+### Dataframes
+
+### Graphs
+]
+.right-column[
+This makes implementing unstructured mesh methods extremely straightforward (Spark notebook 4):
+
+```scala
+def step(g:Graph[nodetype, edgetype]) : Graph[nodetype, edgetype] = {
+    val terms = g.aggregateMessages[msgtype](
+        // Map
+        triplet => { 
+            triplet.sendToSrc(src_msg(triplet.attr, triplet.srcAttr, triplet.dstAttr))
+            triplet.sendToDst(dest_msg(triplet.attr, triplet.srcAttr, triplet.dstAttr))
+          },
+        // Reduce
+        (a, b) => (a._1, a._2, a._3 + b._3, a._4 + b._4, a._5 + b._5, a._6 + b._6, a._7 + b._7)
+    )
+    
+    val new_nodes = terms.mapValues((id, attr) => apply_update(id, attr))
+    
+    return Graph(new_nodes, graph.edges)
+}
+```
+
+.center[<img src="assets/img/graphx-init.png" width=33%></img> <img src="assets/img/graphx-final.png" width=33%></img>]
+]
+---
+.left-column[
+## Spark
+
+### Overview
+
+### RDDs
+
+### Execution graphs
+
+### Dataframes
+
+### Graphs
+
+### Pros/Cons
+]
+.right-column[
+
+### Cons
+
+* JVM Based (Scala) means C interoperability always fraught.
+* Not much support for high-performance interconnects (although that's coming from third parties - [HiBD group at OSU](http://hibd.cse.ohio-state.edu))
+* Very little explicit support for multicore yet, which leaves some performance on the ground.
+* Doesn't scale _down_ very well; very heavyweight
+
+### Pros
+
+* Very rapidly growing
+* Easy to find people willing to learn
+]
+---
+class: center, middle, inverse
+count: false
+## Dask: http://dask.pydata.org/
+---
+class: center, middle, inverse
+count: false
+## TensorFlow: http://tensorflow.org
+---
+.left-column[
+## TensorFlow
+
+### Overview
+]
+.right-column[
+TensorFlow is an open-source dataflow for numerical computation with dataflow graphs, where the data is always in the form of 
+&ldquo;tensors&rdquo; (n-d arrays).
+
+From Google, who uses it for machine learning.
+
+Heavy number crunching, can use GPUs or CPUs, and can distribute tasks of a complex workflow across resources.
+
+.center[<img src="assets/img/tensors_flowing.gif" width=40%></img>]
+]
+---
+.left-column[
+## TensorFlow
+
+### Overview
+
+### Graphs
+]
+.right-column[
+As an example of how a computation is set up, here is a linear regression example.
+
+TensorFlow notebook 1
+
+<img src="assets/img/tf_regression_code.png" width=80%></img>
+]
+---
+.left-column[
+## TensorFlow
+
+### Overview
+
+### Graphs
+]
+.right-column[
+Linear regression is already built in, and doesn't need to be iterative, but this example is quite general and shows how it works.
+
+Variables are explicitly introduced to the TensorFlow runtime, and a series of transformations on the
+variables are defined.
+
+When the entire flowgraph is set up, the system can be run.
+
+The integration of tensorflow tensors and numpy arrays is very nice.
+
+<img src="assets/img/tf_regression_fit.png" width=80%></img>
+]
+---
+.left-column[
+## TensorFlow
+
+### Overview
+
+### Graphs
+
+### Mandelbrot
+]
+.right-column[
+All sorts of computations on regular arrays can be performed.
+
+Some computations can be split across GPUs, or (eventually) even nodes.
+
+All are multi-threaded.
+
+.center[<img src="assets/img/tf_mandelbrot.png" width=75%>]
+]
+---
+.left-column[
+## TensorFlow
+
+### Overview
+
+### Graphs
+
+### Mandelbrot
+
+### Wave Eqn
+]
+.right-column[
+All sorts of computations on regular arrays can be performed.
+
+Some computations can be split across GPUs, or (eventually) even nodes.
+
+All are multi-threaded.
+
+.center[<img src="assets/img/tf_wave_eqn.png" width=75%>]
+]
+---
+.left-column[
+## TensorFlow
+
+### Overview
+
+### Graphs
+
+### Mandelbrot
+
+### Wave Eqn
+
+### Distributed
+]
+.right-column[
+]
+---
+.left-column[
+## TensorFlow
+
+### Overview
+
+### Graphs
+
+### Mandelbrot
+
+### Wave Eqn
+
+### Distributed
+
+### Pros/Cons
+]
+.right-column[
+
+### Cons
+
+* Tensors only means limited support for, eg, unstructured meshes, hash tables (bioinformatics)
+* Distribution of work remains limited and manual (but is expected to improve - Google uses this)
+
+### Pros
+
+* C++ - interfacing is much simpler than 
+* Fast
+* GPU, CPU support, not unreasonble to expect Phi support shortly
+* Great for data processing, image processing, or computations on n-d arrays
+]
+---
+layout: false
+class: center, middle, inverse
+
+## Chapel: http://chapel.cray.com
+---
+.left-column[
+  ## Chapel
+
+  ### Overview
+]
+.right-column[
+Chapel was one of several languages funded through DARPA HPCS (High Productivity Computing Systems) 
+project. Successor of [ZPL](http://research.cs.washington.edu/zpl/home/).
+
+A PGAS language with global view; that is, code can be written as if there was only one thread (think OpenMP)
+
+```fortran
+config const m = 1000, alpha = 3.0;
+
+const ProblemSpace = {1..m} dmapped Block({1..m});
+
+var A, B, C: [ProblemSpace] real;
+
+B = 2.0;
+C = 3.0;
+
+A = B + C;
+```
+
+`$ ./a.out --numLocales=8 --m=50000`
+]
+---
+.left-column[
+  ## Chapel
+
+  ### Overview
+
+  ### Domain Maps
+]
+.right-column[
+Chapel, and ZPL before it:
+
+* Separate the expression of the concurrency from that of the locality.
+* Encapsulate _layout_ of data in a "Domain Map"
+* Express the currency directly in the code - programmer can take control
+* Allows "what ifs", different layouts of different variables.
+
+What distinguishes Chapel from HPL (say) is that it has these maps for other structures - and user can supply domain maps:
+
+<img src="assets/img/domain-maps.png" width=85%></img>
+http://chapel.cray.com/tutorials/SC09/Part4_CHAPEL.pdf
+]
+---
+.left-column[
+  ## Chapel
+
+  ### Overview
+
+  ### Domain Maps
+
+  ### Jacobi
+]
+.right-column[
+Running the Jacobi example shows a standard stencil-on-regular grid calculation:
+
+```bash
+$ cd ~/examples/chapel_examples
+$ chpl jacobi.chpl -o jacobi                   
+$ ./jacobi                                     
+Jacobi computation complete.
+Delta is 9.92124e-06 (< epsilon = 1e-05)
+no of iterations: 60
+```
+<img src="assets/img/chpl-jacobi.png" width=80%></img>
+
+]
+---
+layout: false
+.left-column[
+  ## Chapel
+
+  ### Overview
+
+  ### Domain Maps
+
+  ### Jacobi
+
+  ### Tree Walk
+]
+.right-column[
+Lots of things do stencils on fixed rectangular grids well; maybe
+more impressively, concurrency primitives allow things
+like distributed tree walks simply, too:
+
+<img src="assets/img/chpl-tree.png" width=75%></img>
+]
+---
+.left-column[
+  ## Chapel
+
+  ### Overview
+
+  ### Domain Maps
+
+  ### Jacobi
+
+  ### Tree Walk
+
+  ### Pros/Cons
+]
+.right-column[
+### Cons
+* Compiler still quite slow
+* Domain maps are static, making (say) AMR a ways away. 
+    * (dynamic associative arrays would be a _huge_ win in bioinformatics)
+* Irregular domain maps are not as mature
+
+### Pros
+
+* Growing community
+* Developers very interested in "onboarding" new projects
+* Open source, very portable
+* Using mature approach (PGAS) in interesting ways
+]
+---
+.left-column[
+## Execution Plans
+]
+.right-column[
+All of the approaches we've seen implicitly or explicitly constructed dataflow graphs to describe where data needs to move.
+
+Then can build optimization on top of that to improve data flow, movement
+
+These approaches are extremely promising, and already completely useable at scale for some sorts of tasks.
+
+Already starting to attract attention in HPC, eg [PaRSEC at ICL](http://icl.utk.edu/parsec/):
+
+<img src="assets/img/parsec-toolchain.png" width=45%></img> <img src="assets/img/parsec-QR.png" width=40%></img>
+]
+---
+name: begin
+layout: false
+class: center, middle, inverse
+## Data Layers
+---
+name: begin
+layout: false
+class: center, middle, inverse
+## Akka http://akka.io
+---
+name: begin
+layout: false
+class: center, middle, inverse
+## Data Plane Development Kit http://dpdk.org
+---
+name: begin
+layout: false
+class: center, middle, inverse
+## LibFabric, UCX, CCI
+---
+name: begin
+layout: false
+class: center, middle, inverse
+## GASNET https://gasnet.lbl.gov
+---
 
     </textarea>
     <script src="remark/remark-latest.min.js">
