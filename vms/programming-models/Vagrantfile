@@ -17,9 +17,9 @@ Vagrant.configure(2) do |config|
     vb.cpus = 2
   end
 
-#  config.push.define "atlas" do |push|
-#    push.app = "ljdursi/eurompi16_programming"
-#  end
+  config.push.define "atlas" do |push|
+    push.app = "ljdursi/eurompi16_programming"
+  end
 
   config.vm.provision :shell, path: "install-sw.sh"
 end
