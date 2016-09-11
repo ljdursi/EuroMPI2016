@@ -41,8 +41,8 @@ Thus we also cover
 
 Trying to distill these down it seems like their commonality is
 that they support active messages/RPC for managing highly irregular
-communication patterns, and various approaches for high performance
-- often (but not always) RDMA which is particularly well suited for
+communication patterns, and various approaches for high performance -
+often (but not always) including RDMA which is particularly well suited for
 efficient management of large amounts of mutable state.
 
 After that review, I consider in what directions MPI could go to
