@@ -38,3 +38,19 @@ Thus we also cover
 * [Data Plane Development Kit](http://dpdk.org) a C++ framework which powers [ScyllaDB](http://www.scylladb.com) an extremely fast and efficient distributed NoSQL database key-value store and it's programming framework, [Seastar](http://www.seastar-project.org)
 * [Libfabric](https://ofiwg.github.io/libfabric/), [UCX](http://www.openucx.org) and [CCI](https://github.com/CCI/cci), which all have in common the aim of being low-level high-perforamance technology-agnostic commincations libraries &mdash; notionally (or in some cases literally) the network-agnostic layers from MPI implementations that could also then be used by other programming models, or parallel file systems, or..
 * and the HPC standby [GASNET](https://gasnet.lbl.gov) 
+
+Trying to distill these down it seems like their commonality is that they support active messages/RPC for managing highly irregular communication
+patterns, and various approaches for high performance - often (but not always) RDMA which is particularly well suited for efficient management of
+large amounts of mutable state.
+
+After that review, I consider in what directions MPI could go to flourish. As a programming model, it faces assault from moderate scales from high-productivity
+tools for data analysis (but not necessarily simulation yet) from tools like Spark, and on smaller scales from tools such as Dask and Tensorflow; if Chapel
+starts to take off then the current redoubt of moderate-scale simulations might become lost.
+
+As a data layer, its primary advantages come not from the API but the very high-performance and well-tuned implementation of network layers, 
+but those implementations are already being stripped for parts by projects like CCI, UCX, and Libfabric - and yet it lacks active message support,
+which those have.
+
+MPI could yet flourish anew - I'd very much like to see a future where every scientist relies on MPI every day without ever writing MPI code
+by the library adding active message support, stepping back from synchronous and in-order semantics, and becoming the underlying tool which
+other models rely on.  But that window is closing, and time is running short.
