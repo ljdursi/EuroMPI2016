@@ -6,19 +6,19 @@ at EuroMPI 2016.
 Included are the presentation materials (visible at http://ljdursi.github.io/EuroMPI2016), the [examples](./examples)
 and [VMs](./vms) to run them for all code samples.
 
-Covered are a broad selection of widely used tools in the current large-scale computing landscape:
-* [Spark/GraphX](http://spark.apache.org)
-* [Dask](http://dask.pydata.org)
-* [TensorFlow](http://tensorflow.org)
-* [Chapel](http://chapel.cray.com)
+Covered are a broad selection of widely used tools in the current large-scale numerical computing landscape:
+* [Spark/GraphX](http://spark.apache.org) - a giant in the big data space
+* [Dask](http://dask.pydata.org) - a rapidly growing python framework in data science communities
+* [TensorFlow](http://tensorflow.org) - one of the biggest large-scale deep learning frameworks: python + C++ and has fairly broad support for calculations on &ldquo;tensors&rdquo; (by which they just mean n-d arrays)
+* [Chapel](http://chapel.cray.com) - an HPC PGAS language gaining adoption
 
-Which have some interesting commonalities underlying their very
-diverse ways of providing high-performance but productive programing
-environments for large-scale technical computing.  One important
-functionality they share is making possible computing on very
-unstructured, irregular, dynamic domains, which is becoming
-increasingly important even in normally more structured HPC
-applications as we go to larger and larger scales.
+While these tackle different problems and communities, and take
+very different approaches to provide high-performance but productive
+progarmming for technical computing, they have some interesting
+commonalities.  One important functionality they share is making
+possible computing on very unstructured, irregular, dynamic problems,
+which is becoming increasingly important even in normally more
+structured HPC applications as we go to larger and larger scales.
 
 To manage that complexity, they all implicitly or increasingly
 explicitly express the data flow as an execution graph which can
