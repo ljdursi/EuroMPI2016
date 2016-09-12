@@ -2,8 +2,8 @@
 sudo apt-get update -y
 sudo apt-get install -y git
 sudo apt-get install -y make
-sudo apt-get install -y openjdk-8-jre-headless 
-sudo apt-get install -y scala  # takes care of akka
+sudo apt-get install -y openjdk-7-jre-headless 
+sudo apt-get install -y scala  sbt # takes care of akka
 sudo apt-get install -y vim nano emacs  # yes, even emacs
 sudo apt-get install -y g++ gcc
 sudo apt-get install -y libssl-dev libpam0g-dev zlib1g-dev dh-autoreconf
@@ -37,7 +37,7 @@ git clone https://github.com/shellinabox/shellinabox.git\
     && make install\
     && cd .. 
 
-# Akka dist - for the examples
+# Akka dist - mainly for the examples
 cd "${BASEDIR}"
 git clone git://github.com/akka/akka.git
 
@@ -101,14 +101,24 @@ cd ${BASEDIR}
 echo "UCX Install"
 if [[ ! -d openucx-ucx ]] 
 then
-    wget -q --tries=1 --timeout=15 https://github.com/uccs/ucx/tarball/master -O ucx.tgz
+    getas https://github.com/uccs/ucx/tarball/master ucx.tgz
     tar -xzvf ucx.tgz
     rm ucx.tgz
     mv openucx-ucx-* openucx-ucx
+    cd openucx-ucx
     ./autogen.sh
     ./contrib/configure-release --prefix=$PWD/install --with-mpi
     make -j8 install
 fi
+
+cd ${BASEDIR}
+git clone https://github.com/ljdursi/EuroMPI2016.git
+sudo mv ${BASEDIR}/EuroMPI2016/vms/programming-models/shellinabox /etc/init.d
+chmod 755 /etc/init.d/shellinabox
+sudo update-rc.d shellinabox  defaults
+rm -rf EuroMPI2016
+
+chown -R ${USER}.${GROUP} ${BASEDIR}
 
 #
 # Start up services: 

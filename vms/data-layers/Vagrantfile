@@ -4,7 +4,6 @@ Vagrant.configure(2) do |config|
   config.vm.box = "bento/ubuntu-14.04"
   config.vm.hostname = "dursi-nextgen-hpc-data"
 
-  config.vm.network "forwarded_port", guest: 9999, host: 9999, auto_correct: true
   config.vm.network "forwarded_port", guest: 9998, host: 9998, auto_correct: true
 
   config.vm.network "private_network", ip: "192.168.33.11"
@@ -17,9 +16,9 @@ Vagrant.configure(2) do |config|
     vb.cpus = 2
   end
 
-#  config.push.define "atlas" do |push|
-#    push.app = "ljdursi/eurompi16_data"
-#  end
+  config.push.define "atlas" do |push|
+    push.app = "ljdursi/eurompi16_data"
+  end
 
   config.vm.provision :shell, path: "install-sw.sh"
 end
