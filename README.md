@@ -56,7 +56,7 @@ might become lost.
 As a data layer, its primary advantages come not from the API but
 the very high-performance and well-tuned implementation of network
 layers, but those implementations are already being stripped for
-parts by projects like CCI, UCX, and Libfabric - and yet it lacks
+parts by projects like UCX and Libfabric - and yet it lacks
 active message support, which those have.
 
 MPI could yet flourish anew - I'd very much like to see a future
