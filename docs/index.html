@@ -367,15 +367,165 @@ layout: false
 class: center, middle, inverse
 ## The Problems Big Data Frameworks Aim To Solve
 ---
+.left-column[
+## Big Data Problems
+]
+.right-column[
+Ultimately Big Data problems are more or less the same problems we
+face in HPC although in a different context.
+
+- Large scale network problems
+    - Graph operations
+- Similarity computations, clustering, optimization, 
+    - Linear algebra (amongst others)
+
+The Big Data crowd hit problems of dealing with wildly irregular,
+unstructured, dynamic data structures that we've up til now been
+able to avoid in simulation... but may not be able to on the road
+to Exascale.
+
+- Irregular data lookups:
+    - Key-Value Stores
+]
+---
+.left-column[
+## Big Data Problems
+
+### Key-value stores
+]
+.right-column[
+
+In simulation, you normally have the luxury of knowing exactly where
+needed data is, because you put it there.
+
+Maintained with global state, distributed state, or implicitly
+(structured mesh).
+
+.center[<img src="assets/img/gc-filling.png" width=75%></img>]
+]
+---
+.left-column[
+## Big Data Problems
+
+### Key-value stores
+]
+.right-column[
+With faults, or rapid dynamism, or too-large scale to keep all state
+nearby, less true.
+
+Begins to look a lot like distributed key-value stores in big data.
+
+Much of genomics involves looking data up in string indices or hash
+tables.
+- Good/simple/robust distributed hash tables within an application
+would be extremely valuable.
+
+Highly irregular access (don't know where you're sending to, receiving
+from, when requests are coming, or how many messages you will receive/send) is
+not MPI's strong suit.
+
+.center[<img src="assets/img/dht.png" width=95% style="margin-top:-1em"></img>]
+]
+???
+As data sources get larger and cheaper - and so less reliable - an awful lot
+of data analysis will look like this too
+
+The developers of in-memory NoSQL databases view performance as crucial, and
+are enormously concerned with latency - especially since a query (and especially
+an update) may involve several messages between participating nodes.  However
+MPI is *not* used for this, even internally to the cluster.
+---
+.left-column[
+## Big Data Problems
+
+### Key-value stores
+
+### Linear algebra
+]
+.right-column[
+Almost any sort of numeric computation requires linear algebra.
+
+In many big-data applications, the linear algebra is _extremely_ sparse and unstructured;
+say doing similarity calculations of documents, using a bag-of-words model.
+
+If looking at ngrams, cardinality can be enormous, no real pattern to sparsity
+.center[<img src="assets/img/bag-of-words.png" width="75%"></img>]
+]
+---
+.left-column[
+## Big Data Problems
+
+### Key-value stores
+
+### Linear algebra
+
+### Graph problems
+]
+.right-column[
+As with other problems - big data graphs are like HPC graphs, but more so.
+
+Very sparse, very irregular: nodes can have enormously varying degrees, eg social graphs
+
+.center[<img src="assets/img/social-graph.png" width=75%></img>]
+https://en.wikipedia.org/wiki/Social_graph
+]
+---
+.left-column[
+## Big Data Problems
+
+### Key-value stores
+
+### Linear algebra
+
+### Graph problems
+]
+.right-column[
+Generally decomposed in similar ways.
+
+Processing looks very much like neighbour exchange on an unstructured mesh; can
+map unstructured mesh computations onto (very regular) grpah problems (but graphs more regular.
+
+If anything, these
+[Pregel](https://blog.acolyer.org/2015/05/26/pregel-a-system-for-large-scale-graph-processing/)-type
+graph methods might be a little naive - overly synchronous.
+
+.center[<img src="assets/img/flink-sssp.png" width=75%></img>]
+https://flink.apache.org/news/2015/08/24/introducing-flink-gelly.html
+]
+---
+.left-column[
+## Big Data Problems
+
+### Key-value stores
+
+### Linear algebra
+
+### Graph problems
+
+### Takeaway
+]
+.right-column[
+
+The problems big-data practitioners face are either:
+- The same as in HPC
+- The same as HPCish large-scale scientific data analysis
+- Or what data analysis/HPC will be facing towards exascale
+    - Less regular/structured
+    - More dynamic
+
+So it's worth examining the variety of tools that community has built,
+- To see if they can benefit our community
+- To see what makes them tick.
+]
+---
 layout: false
 class: center, middle, inverse
-## Other Programming Models
+## Big Data Programming Models
 ---
 layout: false
 class: center, middle, inverse
 
 ## Spark: http://spark.apache.com
-
 ---
 .left-column[
 ## Spark
@@ -390,6 +540,8 @@ Hadoop came out in ~2006 with MapReduce as a computational engine, which wasn't 
 
 However, the ecosystem flourished, particularly around the Hadoop file system (HDFS) and new databases
 and processing packages that grew up around it.
+
+.center[<img src="assets/img/mapreduce.png" height=400px></img>]
 ]
 ---
 .left-column[
@@ -407,7 +559,9 @@ Built around concept of resilient distributed datasets
 * Lineage kept
 * If a node fails, rows recalculated 
 
-<img "assets/img/spark-rdd.png" width=75%></img>
+Used for database, machine learing (linear algebra, graph, tree methods), etc
+
+.center[<img src="assets/img/spark-rdd.png" width=50%></img>]
 ]
 ---
 layout: false
@@ -574,14 +728,14 @@ def step(g:Graph[nodetype, edgetype]) : Graph[nodetype, edgetype] = {
 ]
 .right-column[
 
-### Cons
+**Cons**
 
 * JVM Based (Scala) means C interoperability always fraught.
 * Not much support for high-performance interconnects (although that's coming from third parties - [HiBD group at OSU](http://hibd.cse.ohio-state.edu))
 * Very little explicit support for multicore yet, which leaves some performance on the ground.
 * Doesn't scale _down_ very well; very heavyweight
 
-### Pros
+**Pros**
 
 * Very rapidly growing
 * Easy to find people willing to learn
@@ -590,6 +744,194 @@ def step(g:Graph[nodetype, edgetype]) : Graph[nodetype, edgetype] = {
 class: center, middle, inverse
 count: false
 ## Dask: http://dask.pydata.org/
+---
+.left-column[
+## Dask
+
+### Overview
+]
+.right-column[
+Dask is a python parallel computing package
+
+* As small as possible
+* Works very nicely with NumPy, Pandas, Scikit-Learn
+* Is definitely eating into MPI "market share"
+    * For traditional numerical computing on few nodes
+    * For less regular data analysis/machine learning on large scale
+    * (And likely siphoning off a little uptake of Spark)
+* Scales "down" very nicely
+
+Used for very general data analysis (linear algebra, trees, tables, stats, graphs...) and
+machine learning
+
+http://dask.pydata.org
+]
+---
+.left-column[
+## Dask
+
+### Overview
+
+### Task Graphs
+]
+.right-column[
+Allows manual creation of quite general parallel computing data
+flows (making it a great way to prototype parallel numerical
+algorithms):
+
+```python
+from dask import delayed, value
+
+@delayed
+def increment(x, inc=1):
+    return x + inc
+
+@delayed
+def decrement(x, dec=1):
+    return x - dec
+
+@delayed
+def multiply(x, factor):
+    return x*factor
+
+w = increment(1)
+x = decrement(5)
+y = multiply(w, x)
+z = increment(y, 3)
+
+from dask.dot import dot_graph
+dot_graph(z.dask)
+
+z.compute()
+```
+<img src="assets/img/dask-simplegraph.png" style="position: fixed; height: 500px; top: 150px; right: 100px"></img>
+]
+---
+.left-column[
+## Dask
+
+### Overview
+
+### Task Graphs
+]
+.right-column[
+Once the graph is computed, scheduled either across threads, processes, or nodes
+using different scheduler
+
+* Redundant tasks (recomputation) pruned 
+* Memory use kept low
+* If guesses wrong, task dies, scheduler retries
+    * Fault tolerance
+* Intermediate tasks discarded after use
+
+<img src="assets/img/dask-collections-schedulers.png" width=75%></img>
+http://dask.pydata.org/en/latest/index.html
+]
+---
+.left-column[
+## Dask
+
+### Overview
+
+### Task Graphs
+
+### Dask Arrays
+]
+.right-column[
+Array support also includes a small but growing number of linear algebra routines
+
+Dask allows out-of-core computation on arrays (or dataframes, or bags of objects): will be increasingly important in NVM era
+
+* Graph scheduler automatically pulls only chunks necessary for any task into memory
+
+```python
+file = h5py.File(hdf_filename,'r')
+mtx = da.from_array(file['/M'], chunks=(1000, 1000))
+u, s, v = da.linalg.svd(mtx)
+u.compute()
+```
+]
+---
+.left-column[
+## Dask
+
+### Overview
+
+### Task Graphs
+
+### Dask Arrays
+]
+.right-column[
+Arrays have support for guardcells, which make certain sorts of calculations
+trivial to parallelize (but lots of copying right now):
+
+(From dask notebook)
+```python
+subdomain_init = da.from_array(dens_init, chunks=((npts+1)//2, (npts+1)//2))
+
+def dask_step(subdomain, nguard=2):
+    # `advect` is just operator on a numpy array
+    return subdomain.map_overlap(advect, depth=nguard, boundary='periodic')
+
+with ResourceProfiler(0.5) as rprof, Profiler() as prof:
+    subdomain = subdomain_init
+    nsteps = 100
+    for step in range(0, nsteps//2):
+        subdomain = dask_step(subdomain)
+    subdomain = subdomain.compute(num_workers=2, get=mp_get)
+```
+<img src="assets/img/dask-advection.png" width=75%></img>
+]
+---
+.left-column[
+## Dask
+
+### Overview
+
+### Task Graphs
+
+### Dask Arrays
+
+### Diagnostics
+]
+.right-column[
+Comes with several very useful performance profiling tools which 
+will be instantly famiilar to HPC community members
+
+<img src="assets/img/dask-timeline-zoom.png" width=75%></img>
+]
+---
+.left-column[
+## Dask
+
+### Overview
+
+### Task Graphs
+
+### Dask Arrays
+
+### Diagnostics
+
+### Pros/Cons
+]
+.right-column[
+**Cons**
+
+* Performance: Aimed at analysis tasks (big, more loosely coupled) rather than simulation
+    * Scheduler+TCP: 200&mu;s per-task overhead, orders of magnitude larger than an MPI message
+    * Not a replacement in general for tightly-coupled computing
+    * Python
+
+**Pros**
+
+* Trivial to install, start using
+* Automatically overlaps communication with computation: 200&mu;s might not be so bad for some methods
+* Out-of-core support very useful
+* Outstanding for prototyping parallel algorithms
+* With Numba, Numpy, very reasonable performance at few node scales
+* Scheduler, communications all in pure python right now:
+    * Much scope for speedup
+]
 ---
 class: center, middle, inverse
 count: false
@@ -606,7 +948,8 @@ TensorFlow is an open-source dataflow for numerical computation with dataflow gr
 
 From Google, who uses it for machine learning.
 
-Heavy number crunching, can use GPUs or CPUs, and can distribute tasks of a complex workflow across resources.
+Lots of BLAS operations and function evaluations but also general
+numpy-type operations, can use GPUs or CPUs.
 
 .center[<img src="assets/img/tensors_flowing.gif" width=40%></img>]
 ]
@@ -700,6 +1043,33 @@ All are multi-threaded.
 ### Distributed
 ]
 .right-column[
+
+As with laying out the computations, distributing the computations is still 
+quite manual:
+
+```python
+with tf.device("/job:ps/task:0"):
+  weights_1 = tf.Variable(...)
+  biases_1 = tf.Variable(...)
+
+with tf.device("/job:ps/task:1"):
+  weights_2 = tf.Variable(...)
+  biases_2 = tf.Variable(...)
+
+with tf.device("/job:worker/task:7"):
+  input, labels = ...
+  layer_1 = tf.nn.relu(tf.matmul(input, weights_1) + biases_1)
+  logits = tf.nn.relu(tf.matmul(layer_1, weights_2) + biases_2)
+  # ...
+  train_op = ...
+
+with tf.Session("grpc://worker7.example.com:2222") as sess:
+  for _ in range(10000):
+    sess.run(train_op)
+```
+
+Communications os done using [GRPC](http://www.grpc.io), a high-performance
+RPC library based on what Google uses internally.
 ]
 ---
 .left-column[
@@ -719,14 +1089,14 @@ All are multi-threaded.
 ]
 .right-column[
 
-### Cons
+**Cons**
 
 * Tensors only means limited support for, eg, unstructured meshes, hash tables (bioinformatics)
 * Distribution of work remains limited and manual (but is expected to improve - Google uses this)
 
-### Pros
+**Pros**
 
-* C++ - interfacing is much simpler than 
+* C++ - interfacing is much simpler than Spark
 * Fast
 * GPU, CPU support, not unreasonble to expect Phi support shortly
 * Great for data processing, image processing, or computations on n-d arrays
@@ -843,13 +1213,13 @@ like distributed tree walks simply, too:
   ### Pros/Cons
 ]
 .right-column[
-### Cons
+**Cons**
 * Compiler still quite slow
 * Domain maps are static, making (say) AMR a ways away. 
     * (dynamic associative arrays would be a _huge_ win in bioinformatics)
 * Irregular domain maps are not as mature
 
-### Pros
+**Pros**
 
 * Growing community
 * Developers very interested in "onboarding" new projects
