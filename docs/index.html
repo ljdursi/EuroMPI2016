@@ -335,9 +335,9 @@ layout: false
 
 - A tour of data layers the models are built on
     - Akka
+    - GASNET
     - Data Plane Development Kit
     - Libfabric/UCX
-    - GASNET
 
 - Where MPI is: programming model at the data layer
 
@@ -413,12 +413,12 @@ Maintained with global state, distributed state, or implicitly
 With faults, or rapid dynamism, or too-large scale to keep all state
 nearby, less true.
 
-Begins to look a lot like distributed key-value stores in big data.
-
 Much of genomics involves looking data up in string indices or hash
 tables.
 - Good/simple/robust distributed hash tables within an application
 would be extremely valuable.
+
+Begins to look a lot like distributed key-value stores in big data.
 
 Highly irregular access (don't know where you're sending to, receiving
 from, when requests are coming, or how many messages you will receive/send) is
@@ -483,7 +483,7 @@ https://en.wikipedia.org/wiki/Social_graph
 Generally decomposed in similar ways.
 
 Processing looks very much like neighbour exchange on an unstructured mesh; can
-map unstructured mesh computations onto (very regular) grpah problems (but graphs more regular.
+map unstructured mesh computations onto (very regular) graph problems (but graphs more regular).
 
 If anything, these
 [Pregel](https://blog.acolyer.org/2015/05/26/pregel-a-system-for-large-scale-graph-processing/)-type
@@ -501,8 +501,31 @@ https://flink.apache.org/news/2015/08/24/introducing-flink-gelly.html
 ### Linear algebra
 
 ### Graph problems
+]
+.right-column[
+Calculations on (_e.g._) social graphs are typically very low-compute intensity:
+- Sum 
+- Min/Max/Mean
 
-### Takeaway
+So that big-data graph computations are often _more_ latency sensitive than 
+more compute-intensive technical computations
+
+&rArr; lots of work done to reduce communication/framework overhead
+
+.center[<img src="assets/img/graphx-tables_and_graphs.png" width=75%></img>]
+https://spark.apache.org/docs/1.2.1/graphx-programming-guide.html
+]
+---
+.left-column[
+## Big Data Problems
+
+### Key-value stores
+
+### Linear algebra
+
+### Graph problems
+
+### Commonalities
 ]
 .right-column[
 
@@ -515,7 +538,8 @@ The problems big-data practitioners face are either:
 
 So it's worth examining the variety of tools that community has built,
 - To see if they can benefit our community
-- To see what makes them tick.
+- To see what makes them tick
+- To see if we can improve them
 ]
 ---
 layout: false
@@ -555,6 +579,7 @@ Spark is in some ways "post-Hadoop"; it can happily interact with the Hadoop sta
 Built around concept of resilient distributed datasets
 
 * Tables of rows, distributed across the job, normally in-memory
+* Immutable
 * Restricted to certain transformations - map, reduce, join, etc
 * Lineage kept
 * If a node fails, rows recalculated 
@@ -645,10 +670,11 @@ So for instance here, nothing starts happening in earnest until the `plot_data()
 .right-column[
 But RDDs are also building blocks.
 
-Spark Data Frames are lists of columns, like pandas or R data frames.
+Spark Dataframes are lists of columns, like pandas or R data frames.
 
 Can use SQL-like queries to perform calculations.  But this allows bringing the entire mature machinery of SQL query optimizers to bear, allowing further automated optimization of data movement, and computation.
 
+(Spark Notebook 2)
 <img src="assets/img/spark-dataframes.png" width=75%></img>
 ]
 ---
@@ -738,7 +764,11 @@ def step(g:Graph[nodetype, edgetype]) : Graph[nodetype, edgetype] = {
 **Pros**
 
 * Very rapidly growing
+* Performance improvements version to version
 * Easy to find people willing to learn
+???
+Looking over Spark, it's easy to see some Pros and Cons (from the point of view of _our_ use cases; 
+Spark has been designed and optimized for its community, and Big Data users would have a different list of Pros/Cons)
 ]
 ---
 class: center, middle, inverse
@@ -929,7 +959,7 @@ will be instantly famiilar to HPC community members
 * Out-of-core support very useful
 * Outstanding for prototyping parallel algorithms
 * With Numba, Numpy, very reasonable performance at few node scales
-* Scheduler, communications all in pure python right now:
+* Scheduler, communications all in pure python right now, rapidly evolving:
     * Much scope for speedup
 ]
 ---
@@ -1228,7 +1258,49 @@ like distributed tree walks simply, too:
 ]
 ---
 .left-column[
-## Execution Plans
+## Common Themes
+
+### Higher-Level Abstractions
+]
+.right-column[
+MPI with collective operations and MPI-IO have taught us well-chosen higher-level abstractions provide:
+
+- User: **both**:
+    - higher performance (performance portability, autotuning)
+    - higher productivity (less code, fewer errors)
+- Toolbuilder: Clear, interesting targets for:
+    - Algorithmic development (research) 
+    - Implementation tuning (development)
+
+Better deal for both.
+
+.center[<img src="assets/img/mpiio-opts.png" width=75%></img>]
+]
+---
+.left-column[
+## Common Themes
+
+### Higher-Level Abstractions
+]
+.right-column[
+- Spark: Resiliant distributed data set (table), upon which:
+    - Graphs
+    - Dataframes/Datasets
+    - Machine learning algorithms
+- Dask: 
+    - Task Graph
+    - Dataframe, array, bag operations
+- Chapel:
+    - Domains
+    - Locales
+]
+---
+.left-column[
+## Common Themes
+
+### Higher-Level Abstractions
+
+### Data Flow
 ]
 .right-column[
 All of the approaches we've seen implicitly or explicitly constructed dataflow graphs to describe where data needs to move.
@@ -1252,6 +1324,72 @@ layout: false
 class: center, middle, inverse
 ## Akka http://akka.io
 ---
+.left-column[
+## Akka
+
+### Overview
+]
+.right-column[
+Akka is modeled after [Erlang](http://erlang.org):
+
+```scala
+class Ping(pong: ActorRef) extends Actor {
+  var count = 0
+  def incrementAndPrint { count += 1; println("ping") }
+  def receive = {
+    case StartMessage =>
+        incrementAndPrint
+        pong ! PingMessage
+    case PongMessage => 
+        incrementAndPrint
+        if (count > 99) {
+          sender ! StopMessage
+          context.stop(self)
+        } else {
+          sender ! PingMessage
+        }
+  }
+}
+
+object PingPongTest extends App {
+  val system = ActorSystem("PingPongSystem")
+  val pong = system.actorOf(Props[Pong], name = "pong")
+  val ping = system.actorOf(Props(new Ping(pong)), name = "ping")
+  
+  ping ! StartMessage
+}
+```
+http://alvinalexander.com/scala/scala-akka-actors-ping-pong-simple-example
+]
+---
+.left-column[
+## Akka
+
+### Overview
+]
+.right-column[
+
+Akka is a Scala based package that powers Spark, [Flink](http://flink.apache.org):
+
+Actors are message passing
+- Active messages (RPC)
+    - Messages trigger code
+- Unreliable transport:
+    - At most once
+    - But in-order guarantee for successful messages
+- Several backends
+    - HTTP, TCP, or UDP
+- Support for persistence/checkpointing
+- Support for streaming: persistent data flow
+
+Also support for futures, etc.
+]
+---
+name: begin
+layout: false
+class: center, middle, inverse
+## GASNET https://gasnet.lbl.gov
+---
 name: begin
 layout: false
 class: center, middle, inverse
@@ -1260,12 +1398,7 @@ class: center, middle, inverse
 name: begin
 layout: false
 class: center, middle, inverse
-## LibFabric, UCX, CCI
----
-name: begin
-layout: false
-class: center, middle, inverse
-## GASNET https://gasnet.lbl.gov
+## LibFabric, UCX
 ---
 
     </textarea>
