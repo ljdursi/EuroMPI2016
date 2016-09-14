@@ -336,7 +336,7 @@ layout: false
 - A tour of data layers the models are built on
     - Akka
     - GASNET
-    - Data Plane Development Kit
+    - TCP/UDP/Ethernet: Data Plane Development Kit
     - Libfabric/UCX
 
 - Where MPI is: programming model at the data layer
@@ -1319,10 +1319,28 @@ layout: false
 class: center, middle, inverse
 ## Data Layers
 ---
+.left-column[
+## Data layers
+]
+.right-column[
+Programming models like above would be useful for our scientists!
+
+The ones above are tuned for iterative data analysis
+- Less tightly coupled than much HPC simulation
+- But that's a design choice, not a law of physics
+- And science has a lot of data analysis to do anyway
+
+They aren't competitors for MPI, they're the sort of things we'd like
+to have implemented atop MPI
+
+&rArr; Worth examining the data-movement layers of these stacks to
+see what features they require in a communications framework.
+]
+---
 name: begin
 layout: false
 class: center, middle, inverse
-## Akka http://akka.io
+## Spark, Flink: Akka http://akka.io
 ---
 .left-column[
 ## Akka
@@ -1368,37 +1386,143 @@ http://alvinalexander.com/scala/scala-akka-actors-ping-pong-simple-example
 ### Overview
 ]
 .right-column[
-
-Akka is a Scala based package that powers Spark, [Flink](http://flink.apache.org):
+Akka is a Scala based concurrency package that powers Spark, [Flink](http://flink.apache.org):
 
 Actors are message passing
 - Active messages (RPC)
     - Messages trigger code
+- Asynchronous communication and synchronous (w/ timeouts)
 - Unreliable transport:
     - At most once
     - But in-order guarantee for successful messages
+- Failure detection
 - Several backends
     - HTTP, TCP, or UDP
 - Support for persistence/checkpointing
+- Support for migration
 - Support for streaming: persistent data flow
 
 Also support for futures, etc.
 ]
 ---
-name: begin
-layout: false
-class: center, middle, inverse
-## GASNET https://gasnet.lbl.gov
+.left-column[
+## Akka
+
+### Overview
+
+### Benefits for Spark
+]
+.right-column[
+- Active Messages/Actors support very irregular executions defined at runtime
+- Fault tolerance supports the resiliancy goal
+- Immutable messages good match to RDD semantics
+- Akka + JVM allows easy deployment of new code (à la Erlang)
+
+.center[<img src="assets/img/akka_recover.png" width=75%></img>]
+http://zhpooer.github.io/2014/08/03/akka-in-action-testing-actors/
+]
 ---
 name: begin
 layout: false
 class: center, middle, inverse
-## Data Plane Development Kit http://dpdk.org
+## UPC, Chapel, CAF, _etc_.: GASNET https://gasnet.lbl.gov
+---
+.left-column[
+## Chapel
+
+### Overview
+]
+.right-column[
+
+History:
+- 2002: Course Project (Dan Bonachea, Jaein Jeong) 
+- Refactored UPC network stack into library for other applications
+
+Core API: Active messages
+
+Extended API: RDMA, Synchronization
+
+Wide range of backends
+
+Used by UPC, Coarray Fortran, OpenSHMEM reference implementation, Legion, Chapel...
+
+.center[<img src="assets/img/gasnet.png" width=90%></img>]
+https://people.eecs.berkeley.edu/~bonachea/upc/gasnet-project.html</figcaption>
+]
+---
+.left-column[
+## Chapel
+
+### Benefits for PGAS languages
+]
+.right-column[
+
+RDMA is very efficient for random access to large distributed mutable state
+- So not immediately helpful for Spark RDDs
+- Very useful for HPC
+- Compilers are very capable about reordering slow memory access to hide latency
+
+Active messages greatly simply irregular communications patterns, starting tasks remotely
+
+.center[<img src="assets/img/DEGAS-GASNet.png" width=75%></img>]
+https://xstackwiki.modelado.org/DEGAS
+]
 ---
 name: begin
 layout: false
 class: center, middle, inverse
-## LibFabric, UCX
+## TensorFlow, Dask, and one or two other things: 
+## TCP/UDP/Ethernet
+---
+name: begin
+layout: false
+class: center, middle, inverse
+## TensorFlow, Dask, and one or two other things:
+## TCP/UDP/Ethernet
+## No, seriously
+---
+.left-column[
+## TCP/UDP Ethernet
+]
+.right-column[
+High-Frequency traders who [_lay undersea cables_](http://www.telegraph.co.uk/technology/news/8753784/The-300m-cable-that-will-save-traders-milliseconds.html) to avoid latency use [TCP](http://www.openonload.org), often even internally.
+
+User-space networking stacks which avoid kernel round trips can be very performant, eg:
+- [Cisco UCS usNIC](http://blogs.cisco.com/performance/ultra-low-latency-ethernet-questions-and-answers)
+- [Teclo](https://www.snellman.net/blog/archive/2015-08-25-tcp-optimization-in-mobile-networks/)
+- [mTCP](https://github.com/eunyoung14/mtcp)
+- [lkl](https://github.com/libos-nuse/lkl-linuxmTCP), [libuinet](https://github.com/pkelsey/libuinet)
+
+Can be specialized to LAN only, optimized
+
+.center[<img src="assets/img/uspace-tcp.png" width=75%></img>]
+https://github.com/eunyoung14/mtcp
+]
+---
+.left-column[
+## TCP/UDP Ethernet
+
+## Benefits
+]
+.right-column[
+Very mature
+
+Lots of experience with RPC over TCP, eg gRPC from Google (used in TensorFlow)
+
+[Data Plane Development Kit (DPDK)](http://dpdk.org) - userspace ethernet; ~80 cycles/packet
+
+Fault-tolerant
+
+No RDMA.
+
+.center[<img src="assets/img/grpc.png" width=75%></img>]
+https://github.com/eunyoung14/mtcp
+]
+---
+name: begin
+layout: false
+class: center, middle, inverse
+## Upcoming: LibFabric, UCX
 ---
 
     </textarea>
