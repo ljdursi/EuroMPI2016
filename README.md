@@ -11,9 +11,9 @@ Covered are a broad selection of widely used tools in the current large-scale nu
 * [TensorFlow](http://tensorflow.org) - one of the biggest large-scale deep learning frameworks: python + C++ and has fairly broad support for calculations on &ldquo;tensors&rdquo; (by which they just mean n-d arrays)
 * [Chapel](http://chapel.cray.com) - an HPC PGAS language gaining adoption
 
-While these tackle different problems and communities, and take
-very different approaches to provide high-performance but productive
-progarmming for technical computing, they have some interesting
+While these target different problems and communities, and take
+very different approaches to provide high-performance productive
+programming for technical computing, they have some interesting
 commonalities.  One important functionality they share is making
 possible computing on very unstructured, irregular, dynamic problems,
 which is becoming increasingly important even in normally more
@@ -21,7 +21,7 @@ structured HPC applications as we go to larger and larger scales.
 
 To manage that complexity, they all implicitly or increasingly
 explicitly express the data flow as an execution graph which can
-then be optimized over before computation.  The benfits of this
+then be optimized over before computation.  The benfets of this
 sort of approach have [not been lost on the HPC
 community](http://icl.cs.utk.edu/parsec/).
 
