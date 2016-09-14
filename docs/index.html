@@ -314,7 +314,7 @@ of time ever in large-scale computing, with new disciplines, new data sources,
 and new types of hardware sprouting up everywhere in just a decade.  There's
 so much to do!
 
-During this big-computing cambrian explosion we're experiencing, MPI's "steadfastness"
+During this big-computing Cambrian explosion we're experiencing, MPI's "steadfastness"
 has been welcome but is holding it back from being part of this growth.  But that
 need not be the case - the MPI community broadly has much to learn and much to
 contribute to these other models **if it chooses to do so**.  
@@ -585,7 +585,7 @@ Built around concept of resilient distributed datasets
 * Lineage kept
 * If a node fails, rows recalculated 
 
-Used for database, machine learing (linear algebra, graph, tree methods), etc
+Used for database, machine learning (linear algebra, graph, tree methods), _etc._
 
 .center[<img src="assets/img/spark-rdd.png" width=50%></img>]
 ]
@@ -603,7 +603,7 @@ Spark RDDs prove to be a very powerful abstraction.
 
 Key-Value RDDs are a special case - a pair of values, first is key, second is value associated with.
 
-Can easily use join, etc to bring all values associated with a key together:
+Can easily use join, _etc_ to bring all values associated with a key together:
   - Like all terms that are contribute to a particular point
   
 Linda tuple spaces, which underly Gaussian.
@@ -850,13 +850,13 @@ Once the graph is computed, scheduled either across threads, processes, or nodes
 using different scheduler
 
 * Redundant tasks (recomputation) pruned 
+* Intermediate tasks discarded after use
 * Memory use kept low
 * If guesses wrong, task dies, scheduler retries
     * Fault tolerance
-* Intermediate tasks discarded after use
 
-<img src="assets/img/dask-collections-schedulers.png" width=75%></img>
-http://dask.pydata.org/en/latest/index.html
+.center[<img src="assets/img/dask-collections-schedulers.png" width=75%></img>]
+.center[http://dask.pydata.org/en/latest/index.html]
 ]
 ---
 .left-column[
@@ -1415,9 +1415,9 @@ Also support for futures, etc.
 ]
 .right-column[
 - Active Messages/Actors support very irregular executions defined at runtime
-- Fault tolerance supports the resiliancy goal
 - Immutable messages good match to RDD semantics
 - Akka + JVM allows easy deployment of new code (à la Erlang)
+- Fault tolerance supports the resiliancy goal
 
 .center[<img src="assets/img/akka_recover.png" width=75%></img>]
 http://zhpooer.github.io/2014/08/03/akka-in-action-testing-actors/
@@ -1721,6 +1721,8 @@ Lots of places to fit in!
 ## Whither MPI
 
 ### There's so much going on!
+
+### Standards
 ]
 .right-column[
 MPI 4.0 is an enormous opportunity
@@ -1731,8 +1733,8 @@ MPI 4.0 is an enormous opportunity
     - Towards exascale
 
 - x.0 releases are precious things
-    - Breaking backwards compatability is allowed
-    - Breaking backwards compatability is expected
+    - Breaking backwards compatibility is allowed
+    - Breaking backwards compatibility is expected
 ]
 ---
 .left-column[
@@ -1839,11 +1841,16 @@ Dask:
 TensorFlow:
 - Higher-level DSL that generates the data flow graphs
 - Extend support to other accellerators
+
+Chapel:
+- Port code over, help find performance issues
+- Help with partial collectives (_eg_ not `MPI_COMM_WORLD`)
+- Lots of compiler work to be done: LLVM, optimizations, IDE
 ]
 ---
 ## The Future Is Vast and Full of Wonders
 
-A future exists where every scientist &mdash; and most data scientists and big data practitioners &mdash;
+A possible future exists where every scientist &mdash; and most data scientists and big data practitioners &mdash;
 rely on MPI every day while only a few write MPI code
 
 --
