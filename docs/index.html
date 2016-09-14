@@ -1429,7 +1429,7 @@ class: center, middle, inverse
 ## UPC, Chapel, CAF, _etc_.: GASNET https://gasnet.lbl.gov
 ---
 .left-column[
-## Chapel
+## GASNet
 
 ### Overview
 ]
@@ -1439,20 +1439,22 @@ History:
 - 2002: Course Project (Dan Bonachea, Jaein Jeong) 
 - Refactored UPC network stack into library for other applications
 
-Core API: Active messages
-
-Extended API: RMA, Synchronization
-
-Wide range of backends
+Features:
+- Core API: Active messages
+- Extended API: RMA, Synchronization
+- Reliable but unordered
+- Wide range of backends
 
 Used by UPC, Coarray Fortran, OpenSHMEM reference implementation, Legion, Chapel...
 
 .center[<img src="assets/img/gasnet.png" width=90%></img>]
-https://people.eecs.berkeley.edu/~bonachea/upc/gasnet-project.html</figcaption>
+.center[https://people.eecs.berkeley.edu/~bonachea/upc/gasnet-project.html]
 ]
 ---
 .left-column[
-## Chapel
+## GASNet
+
+### Overview
 
 ### Benefits for PGAS languages
 ]
@@ -1466,7 +1468,7 @@ RMA is very efficient for random access to large distributed mutable state
 Active messages greatly simply irregular communications patterns, starting tasks remotely
 
 .center[<img src="assets/img/DEGAS-GASNet.png" width=75%></img>]
-https://xstackwiki.modelado.org/DEGAS
+.center[https://xstackwiki.modelado.org/DEGAS]
 ]
 ---
 name: begin
@@ -1508,15 +1510,16 @@ Can be specialized to LAN only, optimized
 .right-column[
 Very mature
 
-Lots of experience with RPC over TCP, eg gRPC from Google (used in TensorFlow)
-
-[Data Plane Development Kit (DPDK)](http://dpdk.org) - userspace ethernet; ~80 cycles/packet
+Lots of experience with RPC, eg gRPC from Google (used in TensorFlow); unreliable
+transport avilable
 
 Fault-tolerant
 
+[Data Plane Development Kit (DPDK)](http://dpdk.org) - userspace ethernet; ~80 cycles/packet
+
 ~45% of current top 500 is 10G or 1G ethernet
 
-No RDMA.
+But no RDMA (or slower).
 
 .center[<img src="assets/img/grpc.png" width=75% style="margin-top:-2em"></img>]
 .center[https://grcp.io]
@@ -1566,6 +1569,7 @@ layer and expose it to a variety of consumers
 
 Support
 - Active messages
+- Passive messages
 - RMA
 - Atomics (CAS,...)
 
@@ -1575,61 +1579,297 @@ Support
 .left-column[
 ## Libfabric, UCX
 
+### Overview
+
 ### Libfabric
 ]
 .right-column[
+
+Grew out of the OpenFabrics alliance
+
+Hardware abstraction, not network: quite low-level
+
+Scalable addressing support (minimal memory usage)
+
+Lightweight
+
+Reliable or unreliable transport
+
+Substantial support: DOE, DOD, NASA, Intel, Cray, Cisco, Mellanox, IBM, UNH
+
+Some OpenSHMEM implementations, OpenMPI OFI MTL, MPICH channel, GASNet OFI conduit...
+
 .center[<img src="assets/img/libfabric.png" width=75%></img>]
 ]
 ---
 .left-column[
 ## Libfabric, UCX
 
+### Overview
+
 ### Libfabric
 
 ### UCX
 ]
 .right-column[
+
+Started as UCCS, based on OpenMPI BTL/MTLs
+
+Aims as being higher-level API than Libfabric but in truth there's much overlap
+
+Model is more that a single job/task has a UCX "universe"
+
+IBM, UT, Mellanox, NVIDIA, ORNL, Pathscale, UH
+
+Reliable but out-of-order delivery
+
+MPICH, An OpenSHEMEM implementation, OpenMPI..
+
 .center[<img src="assets/img/ucx-architecture.jpg" width=85%></img>]
+]
+---
+.left-column[
+## Libfabric, UCX
+
+### Overview
+
+### Libfabric
+
+### UCX
+
+### Summary
+]
+.right-column[
+Two solid, rapidly maturing projects
+
+Clearly capable of supporting higher-level data layers (MPI, GASNet,
+OpenSHMEM), likely high-enough level for programming models to
+compile down to
+
+Will greatly reduce the barrier to writing high-performance cluster applications
+
+There are slight differences of focus, but is there room for both efforts?
+- Time will tell
+- Competition is good
+]
+---
+.left-column[
+## Data layers
+
+### Summary
+]
+.right-column[
+The data layers that support these richer programming models have a few things in common.
+
+- Relaxed transport reliability semantics
+    - Relaxing one or both of in-order and arrival guarantees, at least optionally
+    - Sometimes it's more natural to handle that at higher levels
+    - In some other cases, not necessary
+    - In these cases, can get higher performance
+]
+--
+.right-column-cont[
+- Fault Tolerance
+    - More natural with relaxed semantics
+    - Crucial for commodity hardware, large-scale
+]
+--
+.right-column-cont[
+- Active messages/RPC
+    - Makes more dynamic and/or irregular communication patterns much more natural
+    - Allows much more complicated problems
+]
+--
+.right-column-cont[
+- RMA
+    - Used in some but not all
+    - Very useful for handling large distributed mutable state
+    - Not all problem domains above require this, but very useful for simulation
 ]
 ---
 name: begin
 layout: false
 class: center, middle, inverse
-## Where does and should MPI fit in
+## Where does (and could) MPI fit in
 ---
 .left-column[
 ## Whither MPI
 
-### Modern compilers 
+### There's so much going on!
 ]
 .right-column[
-```fortran
-!
-! exchange boundary information
-!
+Most exciting time in large-scale technical computing maybe ever.
 
-   sync images(neighbours(1:nneighbours))
-   if (this_image() /= 1) then
-       temperature(1,old) = temperature(locnpoints+1,old)[left]
-   endif
-   if (this_image() /= num_images()) then
-      temperature(locnpoints+2,old) = temperature(2,old)[right]
-   endif
+&ldquo;Cambrian Explosion&rdquo; of new problems, tools, hardware:
+- This is what we signed up for!
 
-!
-! update solution
-!
-   do concurrent (i=2:locnpoints+1)
-       temperature(i,new) = temperature(i,old) + &
-             dt*kappa/(dx**2) * (                &
-                  temperature(i+1,old) -         &
-                2*temperature(i,  old) +         & 
-                  temperature(i-1,old))
-   end do concurrent
-```
+MPI has much to contribute:
+- Great implementations
+- Great algorithmic work
+- Dedicated community which &ldquo;eats its dog food&rdquo;
+
+"MPI" is a lot of things:
+- Standard
+- Implementation
+- Algorithm development community
+- Software development community
+
+Lots of places to fit in!
 ]
 ---
+.left-column[
+## Whither MPI
 
+### There's so much going on!
+]
+.right-column[
+MPI 4.0 is an enormous opportunity
+
+- It's becoming clear what the needs are for
+    - Large scale scientific data analysis
+    - Large scale "big data"-type analysis
+    - Towards exascale
+
+- x.0 releases are precious things
+    - Breaking backwards compatability is allowed
+    - Breaking backwards compatability is expected
+]
+---
+.left-column[
+## Whither MPI
+
+### There's so much going on!
+
+### Standards
+]
+.right-column[
+For the API, it's fairly clear what the broader community needs:
+Relaxed reliability
+- Primarily useful for scientists writing MPI code
+- Scientists shouldn't be writing MPI code
+- Allow applications that can handle out-of-order or dropped messages the performance win by doing so
+]
+--
+.right-column-cont[
+Fault tolerance
+- Heroic attempts at this for years
+- Increasingly, vitally necessary
+- Maybe only allow at relaxed reliability levels?
+]
+--
+.right-column-cont[
+Active messages
+- Really really important for dynamic, irregular problems (all at large enough scale)
+]
+--
+.right-column-cont[
+MPI Runtime
+- Implementations have fantistic, intelligent runtimes
+- Already make many runtime decisions
+- Some bits are exposed through tools
+- Embrace the runtime, allow users more interaction
+- Sessions are a great idea
+]
+---
+.left-column[
+## Whither MPI
+
+### There's so much going on!
+
+### Standards
+]
+.right-column[
+Such an MPI could easily live between (say) Libfabric/UCX and rich programming models
+
+Delivering real value:
+- Through API
+- Through Algorithms
+    - Collectives
+    - IO
+    - Other higher-level primitives?
+- Through intelligent runtimes
+
+Could be a network-agnostic standard not just in HPC but elsewhere
+]
+---
+.left-column[
+## Whither MPI
+
+### There's so much going on!
+
+### Standards
+
+### Algorithms 
+]
+.right-column[
+What does something like Dask or Spark &mdash; maybe built on MPI-4 &mdash; look like when dealing with NVM?
+- External-memory algorithms become cool again!
+- Migrating pages of NVM with RDMA?
+
+Increased interest in execution graph scheduling
+- But centralized scheduler is bottleneck
+- What does work-stealing look like between schedulers?
+- Google Omega
+
+Spark has put a lot of work into graph and machine-learning primitives
+- But for RDDs
+- What can you improve on with mutability?
+]
+---
+.left-column[
+## Whither MPI
+
+### There's so much going on!
+
+### Standards
+
+### Algorithms
+
+### Coding
+]
+.right-column[
+Projects exist that could greatly reduce time-to-science immediately,
+while MPI-4 is sorting out, and eventually take advantage of an
+MPI-4's capabilties
+
+Dask:
+- Try a high-performance network backend (libfabric/UCX?) 
+- Distributed scheduling
+
+TensorFlow:
+- Higher-level DSL that generates the data flow graphs
+- Extend support to other accellerators
+]
+---
+## The Future Is Vast and Full of Wonders
+
+A future exists where every scientist &mdash; and most data scientists and big data practitioners &mdash;
+rely on MPI every day while only a few write MPI code
+
+--
+
+Sockets for high-performance technical computing
+
+--
+
+The platform to build important communications and numerical algorithms, rich programming and analysis enviroments
+
+--
+
+But the world won't wait
+
+--
+
+The world isn't waiting
+
+--
+
+There's much to be done, and the opportunities are everywhere
+
+--
+
+Good luck!
+---
     </textarea>
     <script src="remark/remark-latest.min.js">
     </script>
