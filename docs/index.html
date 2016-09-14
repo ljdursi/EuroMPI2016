@@ -29,8 +29,8 @@
       .black { color: #000000; }
       .large { font-size: 2em; }
       a, a > code {
-        color: rgb(249, 38, 114);
-        text-decoration: none;
+        color: rgb(38, 150, 38);
+#        text-decoration: none;
       }
       code {
         background: #e7e8e2;
@@ -121,11 +121,11 @@
       }
 
       .left-column h2,h3 {
-          color: #000;
+        color: #000;
       }
-        .left-column h2:last-of-type, .left-column h3:last-child {
-          color: #348e28;
-        }
+      .left-column h2:last-of-type, .left-column h3:last-child {
+        color: #348e28;
+      }
       .right-column {
         width: 75%;
         float: right;
@@ -151,7 +151,8 @@ count: false
 Jonathan Dursi<br/>
 Senior Research Associate<br/>
 Centre for Computational Medicine<br/>
-The Hospital for Sick Children
+The Hospital for Sick Children<br/>
+https://github.com/ljdursi/EuroMPI2016
 ---
 name: my-background-1
 layout: false
@@ -1440,7 +1441,7 @@ History:
 
 Core API: Active messages
 
-Extended API: RDMA, Synchronization
+Extended API: RMA, Synchronization
 
 Wide range of backends
 
@@ -1457,7 +1458,7 @@ https://people.eecs.berkeley.edu/~bonachea/upc/gasnet-project.html</figcaption>
 ]
 .right-column[
 
-RDMA is very efficient for random access to large distributed mutable state
+RMA is very efficient for random access to large distributed mutable state
 - So not immediately helpful for Spark RDDs
 - Very useful for HPC
 - Compilers are very capable about reordering slow memory access to hide latency
@@ -1487,7 +1488,7 @@ class: center, middle, inverse
 .right-column[
 High-Frequency traders who [_lay undersea cables_](http://www.telegraph.co.uk/technology/news/8753784/The-300m-cable-that-will-save-traders-milliseconds.html) to avoid latency use [TCP](http://www.openonload.org), often even internally.
 
-User-space networking stacks which avoid kernel round trips can be very performant, eg:
+User-space networking stacks which avoid copies, kernel round trips, locks, can be very performant, eg:
 - [Cisco UCS usNIC](http://blogs.cisco.com/performance/ultra-low-latency-ethernet-questions-and-answers)
 - [Teclo](https://www.snellman.net/blog/archive/2015-08-25-tcp-optimization-in-mobile-networks/)
 - [mTCP](https://github.com/eunyoung14/mtcp)
@@ -1496,7 +1497,7 @@ User-space networking stacks which avoid kernel round trips can be very performa
 Can be specialized to LAN only, optimized
 
 .center[<img src="assets/img/uspace-tcp.png" width=75%></img>]
-https://github.com/eunyoung14/mtcp
+.center[http://github.com/eunyoung14/mtcp]
 ]
 ---
 .left-column[
@@ -1513,16 +1514,120 @@ Lots of experience with RPC over TCP, eg gRPC from Google (used in TensorFlow)
 
 Fault-tolerant
 
+~45% of current top 500 is 10G or 1G ethernet
+
 No RDMA.
 
-.center[<img src="assets/img/grpc.png" width=75%></img>]
-https://github.com/eunyoung14/mtcp
+.center[<img src="assets/img/grpc.png" width=75% style="margin-top:-2em"></img>]
+.center[https://grcp.io]
+]
+---
+.left-column[
+## TCP/UDP Ethernet
+
+## Benefits
+]
+.right-column[
+Example of this: [ScyllaDB](http://www.scylladb.com) NoSQL database, much faster than competitors
+- C++
+- Sockets/Ethernet based, 
+    - Their own user-space TCP 
+    - and/or DPDK
+
+Based on underlying [SeaStar](http://www.seastar-project.org) framework
+- Very interesting C++ concurrent/parallel tools
+- Futures/Promises: Continuations
+- On-node message passing
+- Off-node with explicit networking
+
+.center[<img src="assets/img/scylladb.png" width=50%></img>]
+.center[http://scylladb.com]
 ]
 ---
 name: begin
 layout: false
 class: center, middle, inverse
 ## Upcoming: LibFabric, UCX
+---
+.left-column[
+## Libfabric, UCX
+
+### Overview
+]
+.right-column[
+Many different types of projects have to re-invent the wheel of network-agnostic layer
+- MPI Implementations
+- GASNet
+- High performance file systems
+- Control plane
+
+Projects like Libfabric, UCX, and CCI (now less active) aim to package up this
+layer and expose it to a variety of consumers
+
+Support
+- Active messages
+- RMA
+- Atomics (CAS,...)
+
+.center[<img src="assets/img/open-fabrics-logo.png" width=20%></img><img src="assets/img/UCX_Logo.jpg" width=20%></img>]
+]
+---
+.left-column[
+## Libfabric, UCX
+
+### Libfabric
+]
+.right-column[
+.center[<img src="assets/img/libfabric.png" width=75%></img>]
+]
+---
+.left-column[
+## Libfabric, UCX
+
+### Libfabric
+
+### UCX
+]
+.right-column[
+.center[<img src="assets/img/ucx-architecture.jpg" width=85%></img>]
+]
+---
+name: begin
+layout: false
+class: center, middle, inverse
+## Where does and should MPI fit in
+---
+.left-column[
+## Whither MPI
+
+### Modern compilers 
+]
+.right-column[
+```fortran
+!
+! exchange boundary information
+!
+
+   sync images(neighbours(1:nneighbours))
+   if (this_image() /= 1) then
+       temperature(1,old) = temperature(locnpoints+1,old)[left]
+   endif
+   if (this_image() /= num_images()) then
+      temperature(locnpoints+2,old) = temperature(2,old)[right]
+   endif
+
+!
+! update solution
+!
+   do concurrent (i=2:locnpoints+1)
+       temperature(i,new) = temperature(i,old) + &
+             dt*kappa/(dx**2) * (                &
+                  temperature(i+1,old) -         &
+                2*temperature(i,  old) +         & 
+                  temperature(i-1,old))
+   end do concurrent
+```
+]
 ---
 
     </textarea>
