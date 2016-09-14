@@ -26,7 +26,7 @@ function getas {
     wget -q --tries=1 --timeout=15 ${URL} -O ${output}
 }
 
-# Shell in a box; gets g++, needed for Chapel
+# Shell in a box
 echo "Shell in a box install"
 cd "${BASEDIR}"
 git clone https://github.com/shellinabox/shellinabox.git\
@@ -45,11 +45,12 @@ git clone git://github.com/akka/akka.git
 echo "GASNET Install"
 GASNET_VERSION=1.26.4
 GASNET_TGZ=GASNet-${GASNET_VERSION}.tar.gz
+echo 2 | sudo tee /proc/sys/kernel/randomize_va_space
 if [[ ! -d ${BASEDIR}/GASNet-${GASNET_VERSION} ]]
 then
     cd "${BASEDIR}"
     getas https://gasnet.lbl.gov/${GASNET_TGZ} ${GASNET_TGZ}
-    tar -xzvf ${GASNET_TGZ}
+    tar -xzf ${GASNET_TGZ}
     cd GASNet-${GASNET_VERSION}
     ./configure --prefix=/opt/gasnet
     make all
@@ -68,7 +69,7 @@ echo "DPDK Install"
 if [[ ! -d ${DPDK_DIR} ]] 
 then
     getas ${DPDX_URL} ${DPDX_TARXZ} 
-    tar -xjvf ${DPDX_TARXZ}
+    tar -xJf ${DPDX_TARXZ}
     rm ${DPDX_TARXZ}
     cd ${DPDK_DIR}
     make config T=x86_64-native-linuxapp-gcc
@@ -107,7 +108,7 @@ then
     mv openucx-ucx-* openucx-ucx
     cd openucx-ucx
     ./autogen.sh
-    ./contrib/configure-release --prefix=$PWD/install --with-mpi
+    ./contrib/configure-release --prefix=/opt/openucx --with-mpi
     make -j8 install
 fi
 
@@ -115,7 +116,7 @@ cd ${BASEDIR}
 git clone https://github.com/ljdursi/EuroMPI2016.git
 sudo mv ${BASEDIR}/EuroMPI2016/vms/programming-models/shellinabox /etc/init.d
 chmod 755 /etc/init.d/shellinabox
-sudo update-rc.d shellinabox  defaults
+sudo update-rc.d shellinabox defaults
 rm -rf EuroMPI2016
 
 chown -R ${USER}.${GROUP} ${BASEDIR}
