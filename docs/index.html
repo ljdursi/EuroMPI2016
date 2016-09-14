@@ -465,7 +465,7 @@ If looking at ngrams, cardinality can be enormous, no real pattern to sparsity
 .right-column[
 As with other problems - big data graphs are like HPC graphs, but more so.
 
-Very sparse, very irregular: nodes can have enormously varying degrees, eg social graphs
+Very sparse, very irregular: nodes can have enormously varying degrees, _e.g._ social graphs
 
 .center[<img src="assets/img/social-graph.png" width=75%></img>]
 https://en.wikipedia.org/wiki/Social_graph
@@ -581,7 +581,7 @@ Built around concept of resilient distributed datasets
 
 * Tables of rows, distributed across the job, normally in-memory
 * Immutable
-* Restricted to certain transformations - map, reduce, join, etc
+* Restricted to certain transformations - map, reduce, join, etc.
 * Lineage kept
 * If a node fails, rows recalculated 
 
@@ -603,7 +603,7 @@ Spark RDDs prove to be a very powerful abstraction.
 
 Key-Value RDDs are a special case - a pair of values, first is key, second is value associated with.
 
-Can easily use join, _etc_ to bring all values associated with a key together:
+Can easily use join, _etc._ to bring all values associated with a key together:
   - Like all terms that are contribute to a particular point
   
 Linda tuple spaces, which underly Gaussian.
@@ -1099,7 +1099,7 @@ with tf.Session("grpc://worker7.example.com:2222") as sess:
     sess.run(train_op)
 ```
 
-Communications os done using [GRPC](http://www.grpc.io), a high-performance
+Communications is done using [GRPC](http://www.grpc.io), a high-performance
 RPC library based on what Google uses internally.
 ]
 ---
@@ -1122,14 +1122,14 @@ RPC library based on what Google uses internally.
 
 **Cons**
 
-* Tensors only means limited support for, eg, unstructured meshes, hash tables (bioinformatics)
+* Tensors only means limited support for, e.g., unstructured meshes, hash tables (bioinformatics)
 * Distribution of work remains limited and manual (but is expected to improve - Google uses this)
 
 **Pros**
 
 * C++ - interfacing is much simpler than Spark
 * Fast
-* GPU, CPU support, not unreasonble to expect Phi support shortly
+* GPU, CPU support, not unreasonable to expect Phi support shortly
 * Great for data processing, image processing, or computations on n-d arrays
 ]
 ---
@@ -1284,7 +1284,7 @@ Better deal for both.
 ### Higher-Level Abstractions
 ]
 .right-column[
-- Spark: Resiliant distributed data set (table), upon which:
+- Spark: Resilient distributed data set (table), upon which:
     - Graphs
     - Dataframes/Datasets
     - Machine learning algorithms
@@ -1308,9 +1308,9 @@ All of the approaches we've seen implicitly or explicitly constructed dataflow g
 
 Then can build optimization on top of that to improve data flow, movement
 
-These approaches are extremely promising, and already completely useable at scale for some sorts of tasks.
+These approaches are extremely promising, and already completely usable at scale for some sorts of tasks.
 
-Already starting to attract attention in HPC, eg [PaRSEC at ICL](http://icl.utk.edu/parsec/):
+Already starting to attract attention in HPC, e.g. [PaRSEC at ICL](http://icl.utk.edu/parsec/):
 
 <img src="assets/img/parsec-toolchain.png" width=45%></img> <img src="assets/img/parsec-QR.png" width=40%></img>
 ]
@@ -1417,7 +1417,7 @@ Also support for futures, etc.
 - Active Messages/Actors support very irregular executions defined at runtime
 - Immutable messages good match to RDD semantics
 - Akka + JVM allows easy deployment of new code (à la Erlang)
-- Fault tolerance supports the resiliancy goal
+- Fault tolerance supports the resiliency goal
 
 .center[<img src="assets/img/akka_recover.png" width=75%></img>]
 http://zhpooer.github.io/2014/08/03/akka-in-action-testing-actors/
@@ -1746,6 +1746,7 @@ MPI 4.0 is an enormous opportunity
 ]
 .right-column[
 For the API, it's fairly clear what the broader community needs:
+
 Relaxed reliability
 - Primarily useful for scientists writing MPI code
 - Scientists shouldn't be writing MPI code
@@ -1763,8 +1764,15 @@ Fault tolerance
 Active messages
 - Really really important for dynamic, irregular problems (all at large enough scale)
 ]
---
-.right-column-cont[
+---
+.left-column[
+## Whither MPI
+
+### There's so much going on!
+
+### Standards
+]
+.right-column[
 MPI Runtime
 - Implementations have fantistic, intelligent runtimes
 - Already make many runtime decisions
@@ -1848,7 +1856,7 @@ Chapel:
 - Lots of compiler work to be done: LLVM, optimizations, IDE
 ]
 ---
-## The Future Is Vast and Full of Wonders
+## The Future is Wide Open
 
 A possible future exists where every scientist &mdash; and most data scientists and big data practitioners &mdash;
 rely on MPI every day while only a few write MPI code
