@@ -314,6 +314,7 @@ of time ever in large-scale computing, with new disciplines, new data sources,
 and new types of hardware sprouting up everywhere in just a decade.  There's
 so much to do!
 
+I claim it doesn't have to be this way.
 During this big-computing Cambrian explosion we're experiencing, MPI's "steadfastness"
 has been welcome but is holding it back from being part of this growth.  But that
 need not be the case - the MPI community broadly has much to learn and much to
@@ -414,7 +415,7 @@ Maintained with global state, distributed state, or implicitly
 With faults, or rapid dynamism, or too-large scale to keep all state
 nearby, less true.
 
-Much of genomics involves looking data up in string indices or hash
+Data analysis: much of genomics for instance involves looking data up in string indices or hash
 tables.
 - Good/simple/robust distributed hash tables within an application
 would be extremely valuable.
@@ -484,7 +485,7 @@ https://en.wikipedia.org/wiki/Social_graph
 Generally decomposed in similar ways.
 
 Processing looks very much like neighbour exchange on an unstructured mesh; can
-map unstructured mesh computations onto (very regular) graph problems (but graphs more regular).
+map unstructured mesh computations onto (very regular) graph problems.
 
 If anything, these
 [Pregel](https://blog.acolyer.org/2015/05/26/pregel-a-system-for-large-scale-graph-processing/)-type
@@ -577,11 +578,11 @@ and processing packages that grew up around it.
 .right-column[
 Spark is in some ways "post-Hadoop"; it can happily interact with the Hadoop stack but doesn't require it.
 
-Built around concept of resilient distributed datasets
+Built around concept of in-memry resilient distributed datasets
 
 * Tables of rows, distributed across the job, normally in-memory
 * Immutable
-* Restricted to certain transformations - map, reduce, join, etc.
+* Restricted to certain transformations 
 * Lineage kept
 * If a node fails, rows recalculated 
 
@@ -767,10 +768,10 @@ def step(g:Graph[nodetype, edgetype]) : Graph[nodetype, edgetype] = {
 * Very rapidly growing
 * Performance improvements version to version
 * Easy to find people willing to learn
+]
 ???
 Looking over Spark, it's easy to see some Pros and Cons (from the point of view of _our_ use cases; 
 Spark has been designed and optimized for its community, and Big Data users would have a different list of Pros/Cons)
-]
 ---
 class: center, middle, inverse
 count: false
@@ -846,8 +847,7 @@ z.compute()
 ### Task Graphs
 ]
 .right-column[
-Once the graph is computed, scheduled either across threads, processes, or nodes
-using different scheduler
+Once the graph is constructed, computing means scheduling either across threads, processes, or nodes
 
 * Redundant tasks (recomputation) pruned 
 * Intermediate tasks discarded after use
@@ -874,6 +874,7 @@ Array support also includes a small but growing number of linear algebra routine
 Dask allows out-of-core computation on arrays (or dataframes, or bags of objects): will be increasingly important in NVM era
 
 * Graph scheduler automatically pulls only chunks necessary for any task into memory
+* New: intermediate results can be spilled to disk
 
 ```python
 file = h5py.File(hdf_filename,'r')
@@ -997,9 +998,9 @@ As an example of how a computation is set up, here is a linear regression exampl
 
 TensorFlow notebook 1
 
-<img src="assets/img/tf_regression_code.png" width=80%></img>
+<img src="assets/img/tf_regression_code.png" width=110%></img>
 ]
----
+--1
 .left-column[
 ## TensorFlow
 
@@ -1099,7 +1100,7 @@ with tf.Session("grpc://worker7.example.com:2222") as sess:
     sess.run(train_op)
 ```
 
-Communications is done using [GRPC](http://www.grpc.io), a high-performance
+Communications is done using [gRPC](http://www.grpc.io), a high-performance
 RPC library based on what Google uses internally.
 ]
 ---
@@ -1122,7 +1123,7 @@ RPC library based on what Google uses internally.
 
 **Cons**
 
-* Tensors only means limited support for, e.g., unstructured meshes, hash tables (bioinformatics)
+* N-d arrays only means limited support for, e.g., unstructured meshes, hash tables (bioinformatics)
 * Distribution of work remains limited and manual (but is expected to improve - Google uses this)
 
 **Pros**
@@ -1264,7 +1265,7 @@ like distributed tree walks simply, too:
 ### Higher-Level Abstractions
 ]
 .right-column[
-MPI with collective operations and MPI-IO have taught us well-chosen higher-level abstractions provide:
+MPI with collective operations and MPI-IO has taught us well-chosen higher-level abstractions provide:
 
 - User: **both**:
     - higher performance (performance portability, autotuning)
@@ -1291,6 +1292,8 @@ Better deal for both.
 - Dask: 
     - Task Graph
     - Dataframe, array, bag operations
+- TensorFlow:
+    - Data flow
 - Chapel:
     - Domains
     - Locales
@@ -1380,6 +1383,10 @@ object PingPongTest extends App {
 ```
 http://alvinalexander.com/scala/scala-akka-actors-ping-pong-simple-example
 ]
+???
+Erlang is a functional programming language with asyncronous, active message passing that triggers actions via pattern matching.
+We can see an example with this simple ping-pong example in Akka.  If the "Ping" actor gets a start message, 
+it sends a Ping message to the pong actor; if it gets a pong back, it either pings again or exits after enouugh iterations.
 ---
 .left-column[
 ## Akka
@@ -1414,7 +1421,7 @@ Also support for futures, etc.
 ### Benefits for Spark
 ]
 .right-column[
-- Active Messages/Actors support very irregular executions defined at runtime
+- Active Messages/Actors support very irregular executions discovered at runtime
 - Immutable messages good match to RDD semantics
 - Akka + JVM allows easy deployment of new code (à la Erlang)
 - Fault tolerance supports the resiliency goal
@@ -1463,9 +1470,9 @@ Used by UPC, Coarray Fortran, OpenSHMEM reference implementation, Legion, Chapel
 RMA is very efficient for random access to large distributed mutable state
 - So not immediately helpful for Spark RDDs
 - Very useful for HPC
-- Compilers are very capable about reordering slow memory access to hide latency
+- Compilers are very capable at reordering slow memory access to hide latency
 
-Active messages greatly simply irregular communications patterns, starting tasks remotely
+Active messages greatly simplify irregular communications patterns, starting tasks remotely
 
 .center[<img src="assets/img/DEGAS-GASNet.png" width=75%></img>]
 .center[https://xstackwiki.modelado.org/DEGAS]
@@ -1490,7 +1497,7 @@ class: center, middle, inverse
 .right-column[
 High-Frequency traders who [_lay undersea cables_](http://www.telegraph.co.uk/technology/news/8753784/The-300m-cable-that-will-save-traders-milliseconds.html) to avoid latency use [TCP](http://www.openonload.org), often even internally.
 
-User-space networking stacks which avoid copies, kernel round trips, locks, can be very performant, eg:
+User-space networking stacks can have true zero-copies, avoid context switches, and so can be very performant, eg:
 - [Cisco UCS usNIC](http://blogs.cisco.com/performance/ultra-low-latency-ethernet-questions-and-answers)
 - [Teclo](https://www.snellman.net/blog/archive/2015-08-25-tcp-optimization-in-mobile-networks/)
 - [mTCP](https://github.com/eunyoung14/mtcp)
@@ -1710,7 +1717,7 @@ MPI has much to contribute:
 
 "MPI" is a lot of things:
 - Standard
-- Implementation
+- Implementations
 - Algorithm development community
 - Software development community
 
@@ -1748,7 +1755,7 @@ MPI 4.0 is an enormous opportunity
 For the API, it's fairly clear what the broader community needs:
 
 Relaxed reliability
-- Primarily useful for scientists writing MPI code
+- Strict is primarily useful for scientists writing MPI code
 - Scientists shouldn't be writing MPI code
 - Allow applications that can handle out-of-order or dropped messages the performance win by doing so
 ]
@@ -1775,10 +1782,9 @@ Active messages
 .right-column[
 MPI Runtime
 - Implementations have fantistic, intelligent runtimes
-- Already make many runtime decisions
-- Some bits are exposed through tools
+- Already make many decisions for the user
+- Some bits are exposed through tools interface
 - Embrace the runtime, allow users more interaction
-- Sessions are a great idea
 ]
 ---
 .left-column[
