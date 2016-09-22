@@ -583,8 +583,6 @@ Built around concept of in-memry resilient distributed datasets
 * Tables of rows, distributed across the job, normally in-memory
 * Immutable
 * Restricted to certain transformations 
-* Lineage kept
-* If a node fails, rows recalculated 
 
 Used for database, machine learning (linear algebra, graph, tree methods), _etc._
 
@@ -752,6 +750,55 @@ def step(g:Graph[nodetype, edgetype]) : Graph[nodetype, edgetype] = {
 
 ### Graphs
 
+### Adoption
+]
+.right-column[
+Adoption has been enormous in industry and elsewhere
+- Biggest open-source big-data platform
+- Selected in industry because of performance
+.center[<img src="assets/img/spark-business-uptake.png" width=75%></img>]
+.center[http://insidebigdata.com/2015/11/17/why-is-apache-spark-so-hot/]
+]
+---
+.left-column[
+## Spark
+
+### Overview
+
+### RDDs
+
+### Execution graphs
+
+### Dataframes
+
+### Graphs
+
+### Adoption
+]
+.right-column[
+Adoption has been enormous
+- Huge interest by programmers
+.center[<img src="assets/img/spark-interest.png" width=75%></img>]
+.center[Google Search]
+.center[<img src="assets/img/stack-overflow-qs.png" width=75%></img>]
+.center[Questions on Stack Overflow]
+]
+---
+.left-column[
+## Spark
+
+### Overview
+
+### RDDs
+
+### Execution graphs
+
+### Dataframes
+
+### Graphs
+
+### Adoption
+
 ### Pros/Cons
 ]
 .right-column[
@@ -785,6 +832,7 @@ count: false
 .right-column[
 Dask is a python parallel computing package
 
+* Very new - 2015
 * As small as possible
 * Works very nicely with NumPy, Pandas, Scikit-Learn
 * Is definitely eating into MPI "market share"
@@ -978,6 +1026,8 @@ count: false
 TensorFlow is an open-source dataflow for numerical computation with dataflow graphs, where the data is always in the form of 
 &ldquo;tensors&rdquo; (n-d arrays).
 
+Very new: Released November 2015
+
 From Google, who uses it for machine learning.
 
 Lots of BLAS operations and function evaluations but also general
@@ -1000,7 +1050,7 @@ TensorFlow notebook 1
 
 <img src="assets/img/tf_regression_code.png" width=110%></img>
 ]
---1
+---
 .left-column[
 ## TensorFlow
 
@@ -1116,6 +1166,32 @@ RPC library based on what Google uses internally.
 ### Wave Eqn
 
 ### Distributed
+
+### Adoption
+]
+.right-column[
+Very rapid adoption, even though targetted very narrowly: deep learning
+
+All threaded number crunching on arrays and communication of results of those
+array calculations
+
+.center[<img src="assets/img/tensorflow-interest.png" width=75%>]
+]
+---
+.left-column[
+## TensorFlow
+
+### Overview
+
+### Graphs
+
+### Mandelbrot
+
+### Wave Eqn
+
+### Distributed
+
+### Adoption
 
 ### Pros/Cons
 ]
