@@ -273,6 +273,32 @@ I talk about MPI's place in modern big computing - even big scientific
 computing.  In the broader sweep of large technical computing, MPI's
 place is small, and getting smaller.
 ---
+##MPI is For...
+
+<br/>
+<br/>
+<br/>
+<br/>
+<center>
+<table>
+<tr>
+    <td>1990s</td><td>All multi-node cluster computing</td>
+</tr>
+<tr>
+    <td>2000s</td><td>All multi-node scientific computing</td>
+</tr>
+<tr>
+    <td>2005ish</td><td>All multi-node physical sciences computing</td>
+</tr>
+<tr>
+    <td>2010s</td><td>All multi-node physical sciences simulation</td>
+</tr>
+<tr>
+    <td>2016</td><td>Much multi-node physical sciences simulation</td>
+</tr>
+</table>
+</center>
+---
 layout: false
 .left-column[
   ## Top500 vs The Cloud
@@ -432,10 +458,12 @@ not MPI's strong suit.
 As data sources get larger and cheaper - and so less reliable - an awful lot
 of data analysis will look like this too
 
-The developers of in-memory NoSQL databases view performance as crucial, and
-are enormously concerned with latency - especially since a query (and especially
-an update) may involve several messages between participating nodes.  However
-MPI is *not* used for this, even internally to the cluster.
+The users and developers of in-memory NoSQL databases view performance
+as crucial, and so teams are enormously concerned with latency -
+especially since a query (and especially an update) may involve
+several messages between participating nodes.  The discussions
+surrounding latency, bandwidth, cache utilisation, threading, etc would 
+all be extremely familiar to those who work on HPC software.
 ---
 .left-column[
 ## Big Data Problems
@@ -453,6 +481,11 @@ say doing similarity calculations of documents, using a bag-of-words model.
 If looking at ngrams, cardinality can be enormous, no real pattern to sparsity
 .center[<img src="assets/img/bag-of-words.png" width="75%"></img>]
 ]
+???
+An interesting result of the different use case is that while many
+big-data platforms do have linear algebra routines, there is almost
+no dense Ax=b solvers, and likely not even sparse Ax=b solvers available,
+but tools like SVD decompositions are often available
 ---
 .left-column[
 ## Big Data Problems
@@ -471,6 +504,8 @@ Very sparse, very irregular: nodes can have enormously varying degrees, _e.g._ s
 .center[<img src="assets/img/social-graph.png" width=75%></img>]
 https://en.wikipedia.org/wiki/Social_graph
 ]
+???
+Inexplicably, Justin Bierber has far more followers than I do on twitter
 ---
 .left-column[
 ## Big Data Problems
@@ -603,7 +638,7 @@ Spark RDDs prove to be a very powerful abstraction.
 Key-Value RDDs are a special case - a pair of values, first is key, second is value associated with.
 
 Can easily use join, _etc._ to bring all values associated with a key together:
-  - Like all terms that are contribute to a particular point
+  - Like all stencil terms that are contribute at a particular grid point
   
 Linda tuple spaces, which underly Gaussian.
 
@@ -755,6 +790,7 @@ def step(g:Graph[nodetype, edgetype]) : Graph[nodetype, edgetype] = {
 .right-column[
 Adoption has been enormous in industry and elsewhere
 - Biggest open-source big-data platform
+- Huge private-sector adoption, which has been hard for HPC
 - Selected in industry because of performance
 .center[<img src="assets/img/spark-business-uptake.png" width=75%></img>]
 .center[http://insidebigdata.com/2015/11/17/why-is-apache-spark-so-hot/]
@@ -1593,8 +1629,7 @@ Can be specialized to LAN only, optimized
 .right-column[
 Very mature
 
-Lots of experience with RPC, eg gRPC from Google (used in TensorFlow); unreliable
-transport avilable
+Lots of experience with RPC, eg gRPC from Google (used in TensorFlow); unreliable transport available
 
 Fault-tolerant
 
@@ -1962,6 +1997,10 @@ The world isn't waiting
 --
 
 There's much to be done, and the opportunities are everywhere
+
+--
+
+Good Luck!
 
     </textarea>
     <script src="remark/remark-latest.min.js">
