@@ -389,7 +389,7 @@ MPI's potential role.
 
 Once we've sketched out the map, I want to describe the place I see
 MPI as occupying now &mdash; and the attractive neighbouring vacant
-land that we can occupy if we want.
+territories that we can occupy if we want.
 ---
 layout: false
 class: center, middle, inverse
@@ -420,9 +420,10 @@ Ultimately Big Data problems are more or less the same problems we
 face in HPC although in a different context.
 
 The Big Data crowd hit problems of dealing with wildly irregular,
-unstructured, dynamic data structures that we've up til now been
-able to avoid in simulation... but may not be able to on the road
-to Exascale.
+unstructured, dynamic data structures first - irregularity to a
+degree that we've up til now been able to avoid in simulation...
+but may not be able to on the road to Exascale.
+
 ---
 .left-column[
 ## Big Data Problems
@@ -465,12 +466,12 @@ not MPI's strong suit.
 ]
 ???
 But having a global view of data locations becomes less feasible even
-for simulations at large engough scale.
-
-And data sources get more numerous and cheaper - and so less reliable -
-an awful lot of data analysis will look like this too
+for simulations at large enough scale.
 
 Data analysis: much of genomics for instance involves looking data up in string indices or hash tables.
+
+And data sources get more numerous and cheaper - and so less reliable -
+an awful lot of other data analysis will look like this too
 
 The users and developers of in-memory NoSQL databases view performance
 as crucial, and so teams are enormously concerned with latency -
@@ -496,6 +497,18 @@ If looking at ngrams, cardinality can be enormous, no real pattern to sparsity
 .center[<img src="assets/img/bag-of-words.png" width="75%"></img>]
 ]
 ???
+Almost any sort of numeric computation requires linear algebra.
+That's just mathematics, and is inescapable.
+
+In many big-data applications, the linear algebra is _extremely_
+sparse and unstructured; say doing similarity calculations of
+documents, using a bag-of-words model, where order is ignored
+and documents are described as simply counts of occuring words ---
+very sparse integer vectors.
+
+Words are one thing, but If looking at ngrams, 
+cardinality can be enormous, no real pattern to sparsity
+
 An interesting result of the different use case is that while many
 big-data platforms do have linear algebra routines, there is almost
 no dense Ax=b solvers, and likely not even sparse Ax=b solvers available,
@@ -519,7 +532,15 @@ Very sparse, very irregular: nodes can have enormously varying degrees, _e.g._ s
 https://en.wikipedia.org/wiki/Social_graph
 ]
 ???
-Inexplicably, Justin Bierber has far more followers than I do on twitter
+For graphs in physical science simulation - say unstructured grids -
+or analysis, nodes typically have say within a factor of two or order of
+magnitude the same number of neighbours.
+
+Not so with s(say0 social media graphs:
+
+Inexplicably, Justin Bieber has far more twice as many followers
+as I do on twitter
+
 ---
 .left-column[
 ## Big Data Problems
@@ -673,7 +694,9 @@ Operations on Spark RDDs can be:
 * Transformations, like map, filter, join...
 * Actions like collect, foreach, ..
 
-You build a Spark computation by chaining together operations; but no data starts moving until part of the computation is materialized with an action.
+You build a Spark computation by chaining together transformations;
+but no data starts moving until part of the computation is materialized
+with an action.
 
 <img src="assets/img/spark-rdd.png" width=75%></img>
 ]
@@ -1548,7 +1571,6 @@ Also support for futures, etc.
 ]
 .right-column[
 - Active Messages/Actors support very irregular executions discovered at runtime
-- Immutable messages good match to RDD semantics
 - Akka + JVM allows easy deployment of new code (à la Erlang)
 - Fault tolerance supports the resiliency goal
 
@@ -1575,7 +1597,7 @@ History:
 Features:
 - Core API: Active messages
 - Extended API: RMA, Synchronization
-- Reliable but unordered
+- Guaranteed delivery but unordered
 - Wide range of backends
 
 Used by UPC, Coarray Fortran, OpenSHMEM reference implementation, Legion, Chapel...
@@ -1840,6 +1862,15 @@ MPI has much to contribute:
 - Great algorithmic work
 - Dedicated community which &ldquo;eats its dog food&rdquo;
 
+How Can MPI Fit Into Today's Big Computing?
+]
+---
+.left-column[
+## Whither MPI
+
+### There's so much going on!
+]
+.right-column[
 "MPI" is a lot of things:
 - Standard
 - Implementations
@@ -1943,6 +1974,8 @@ Could be a network-agnostic standard not just in HPC but elsewhere
 ### Algorithms 
 ]
 .right-column[
+Collectives under nonreliable transport
+
 What does something like Dask or Spark &mdash; maybe built on MPI-4 &mdash; look like when dealing with NVM?
 - External-memory algorithms become cool again!
 - Migrating pages of NVM with RDMA?
