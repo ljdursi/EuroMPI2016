@@ -399,22 +399,30 @@ class: center, middle, inverse
 ## Big Data Problems
 ]
 .right-column[
-Ultimately Big Data problems are more or less the same problems we
-face in HPC although in a different context.
+Big Data problems same as HPC, if in different context
 
 - Large scale network problems
     - Graph operations
 - Similarity computations, clustering, optimization, 
-    - Linear algebra (amongst others)
+    - Linear algebra
+    - Tree methods
+- Time series
+    - FFTs, smoothing, ...
+
+Main difference: hit highly irregular, unstructured, dyanamic problems
+earlier in data analysis than simulation (but Exascale...)
+
+- Irregular data lookups:
+    - Key-Value Stores
+]
+???
+Ultimately Big Data problems are more or less the same problems we
+face in HPC although in a different context.
 
 The Big Data crowd hit problems of dealing with wildly irregular,
 unstructured, dynamic data structures that we've up til now been
 able to avoid in simulation... but may not be able to on the road
 to Exascale.
-
-- Irregular data lookups:
-    - Key-Value Stores
-]
 ---
 .left-column[
 ## Big Data Problems
@@ -441,8 +449,9 @@ Maintained with global state, distributed state, or implicitly
 With faults, or rapid dynamism, or too-large scale to keep all state
 nearby, less true.
 
-Data analysis: much of genomics for instance involves looking data up in string indices or hash
-tables.
+Data analysis: much of genomics involves lookups in indices too large
+for one node's memory
+
 - Good/simple/robust distributed hash tables within an application
 would be extremely valuable.
 
@@ -455,8 +464,13 @@ not MPI's strong suit.
 .center[<img src="assets/img/dht.png" width=95% style="margin-top:-1em"></img>]
 ]
 ???
-As data sources get larger and cheaper - and so less reliable - an awful lot
-of data analysis will look like this too
+But having a global view of data locations becomes less feasible even
+for simulations at large engough scale.
+
+And data sources get more numerous and cheaper - and so less reliable -
+an awful lot of data analysis will look like this too
+
+Data analysis: much of genomics for instance involves looking data up in string indices or hash tables.
 
 The users and developers of in-memory NoSQL databases view performance
 as crucial, and so teams are enormously concerned with latency -
