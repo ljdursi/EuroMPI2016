@@ -138,6 +138,9 @@
         padding-top: 0em;
         margin-top: -1em;
       }
+      .large-text {
+          font-size: 150%
+      }
     </style>
   </head>
   <body>
@@ -180,9 +183,9 @@ from.  This story is probably pretty familiar to many of you - I
 started off doing science with computing, and ended up drifting to
 the other side of that divide, doing computing to support science.
 
-I was doing pretty pretty standard HPC stuff - high speed flows
-(so explicit methods), reactive, adaptive grid, FORTRAN with some
-C and python, that sort of thing. 
+I was doing pretty pretty standard HPC stuff - high speed reactive
+flows (explicit methods), adaptive grid, FORTRAN with some C and
+python, that sort of thing.
 
 --
 .right-column-cont[
@@ -230,8 +233,6 @@ distributed memory, using MPI.  So it sounds like I found a pretty
 good niche in Genomics for an HPCer, right?
 --
 .right-column-cont[
-    - "Never Again"
-
 - ABySS 2.0 just came out, with a new non-MPI mode
 ]
 ???
@@ -262,16 +263,25 @@ using Apache Spark.
 In the meantime, one of the leading standards for genome analysis, GATK, 
 has just announced that version 4 will support distributed cluster computing &mdash; 
 using Apache Spark.
+
+How did we get to the point where an entire field of science - and biology is much
+larger than physics - simply looks at MPI and then keeps going?
+
+My concern is the following:
 ---
 name: begin
 layout: false
 class: center, middle, inverse
 ## MPI's Place In Big Computing Is Small, and Getting Smaller
 ???
-How did we get here?  This is the background I'm coming from when
-I talk about MPI's place in modern big computing - even big scientific
-computing.  In the broader sweep of large technical computing, MPI's
-place is small, and getting smaller.
+MPI's Place In Big Computing Is Small, and Getting Smaller
+
+I say this as someone who has used MPI successfully in
+multiple disciplines, and sees little place for it in my new line
+of work.  I'm also someone someone who disagrees with
+very little of Mark Parsons' or Bill Gropp's assessment of the past
+successes of MPI, but disagrees quite a bit about the extrapolation
+to the future.
 ---
 ##MPI is For...
 
@@ -279,25 +289,44 @@ place is small, and getting smaller.
 <br/>
 <br/>
 <br/>
+.large-text[
 <center>
 <table>
 <tr>
     <td>1990s</td><td>All multi-node cluster computing</td>
 </tr>
 <tr>
-    <td>2000s</td><td>All multi-node scientific computing</td>
+    <td>2000s</td><td>All multi-node <b>scientific</b> computing</td>
 </tr>
 <tr>
-    <td>2005ish</td><td>All multi-node physical sciences computing</td>
+    <td>2006ish&nbsp;</td><td>All multi-node scientific <b>simulation</b></td>
 </tr>
 <tr>
-    <td>2010s</td><td>All multi-node physical sciences simulation</td>
+    <td>2010s</td><td>All multi-node <b>physical sciences</b> simulation</td>
 </tr>
 <tr>
-    <td>2016</td><td>Much multi-node physical sciences simulation</td>
+    <td>2016</td><td><b>Much</b> multi-node physical sciences simulation</td>
 </tr>
 </table>
 </center>
+]
+???
+Becaus/ I have concerns.  Again, these are the concerns of a recently very
+active MPI user who would like to see current HPC expertise effectively
+utilized and for MPI to succeed.
+
+My concern is that without any decision being conciously made that I'm aware
+of, the ambition of MPI has been continuously whittled down, and the applicability
+of MPI is being relentlessly de-scoped.  
+
+By and large, clarity of focus is to be admired.  But as Prof. Gropp
+has mentioned, &ldquo;completeness&rdquo; is important for a
+communications tool, and a message passing library that is specialized to
+a very particular form of technical computing is one that increasingly
+easily be chosen or not.  
+
+And it's never been clear to me why a parallel-computing library 
+that transports data should have a specialty in the kinds of data being crunched.
 ---
 layout: false
 .left-column[
@@ -309,11 +338,11 @@ layout: false
 .right[<img src="2013-top500-hyperscalers.png" width=75%>]
 ]
 ???
-You can see this when looking at who is computing and where they
-are doing their computations - when I started looking at big
-scientific computing more broadly in 2013, the top500, where most
-MPI tasks are run, was already starting to be a fairly small fraction
-of the available computing out there...
+Because right now that specialty is a shrinking portion of a rapidly growing pie.
+
+When I started looking at genomics scientific computing in 2013,
+the top500, where most MPI tasks are run, was already starting to
+be a fairly small fraction of the available computing out there...
 ---
 layout: false
 .left-column[
@@ -340,11 +369,12 @@ of time ever in large-scale computing, with new disciplines, new data sources,
 and new types of hardware sprouting up everywhere in just a decade.  There's
 so much to do!
 
-I claim it doesn't have to be this way.
-During this big-computing Cambrian explosion we're experiencing, MPI's "steadfastness"
-has been welcome but is holding it back from being part of this growth.  But that
-need not be the case - the MPI community broadly has much to learn and much to
-contribute to these other models **if it chooses to do so**.  
+I claim it doesn't have to be this way.  During this big-computing
+Cambrian explosion we're experiencing, MPI's shall we say "steadfastness"
+has been welcome but is holding it back from being part of this
+growth.  But that need not be the case - the MPI community broadly
+has much to learn and much to contribute to these other models **if
+it chooses to do so**.
 ---
 layout: false
 .left-column[
@@ -372,7 +402,7 @@ layout: false
 - Where MPI can be
 ]
 ???
-It's very difficult to describe what place MPI occupies in the
+It's very difficult to describe what place MPI does and can occupy in the
 landscape without drawing a map, so what I want to do for the beginning
 of our time together is to walk through these new territories with you.
 
@@ -473,6 +503,13 @@ Data analysis: much of genomics for instance involves looking data up in string 
 And data sources get more numerous and cheaper - and so less reliable -
 an awful lot of other data analysis will look like this too
 
+Begins to look a lot like distributed key-value stores - a fundamental 
+primitive in many big data applications.
+
+Highly irregular access (don't know where you're sending to, receiving
+from, when requests are coming, or how many messages you will receive/send) is
+not MPI's strong suit.
+
 The users and developers of in-memory NoSQL databases view performance
 as crucial, and so teams are enormously concerned with latency -
 especially since a query (and especially an update) may involve
@@ -503,16 +540,11 @@ That's just mathematics, and is inescapable.
 In many big-data applications, the linear algebra is _extremely_
 sparse and unstructured; say doing similarity calculations of
 documents, using a bag-of-words model, where order is ignored
-and documents are described as simply counts of occuring words ---
+and documents are described as simply occurrance counts words ---
 very sparse integer vectors.
 
 Words are one thing, but If looking at ngrams, 
 cardinality can be enormous, no real pattern to sparsity
-
-An interesting result of the different use case is that while many
-big-data platforms do have linear algebra routines, there is almost
-no dense Ax=b solvers, and likely not even sparse Ax=b solvers available,
-but tools like SVD decompositions are often available
 ---
 .left-column[
 ## Big Data Problems
@@ -532,11 +564,14 @@ Very sparse, very irregular: nodes can have enormously varying degrees, _e.g._ s
 https://en.wikipedia.org/wiki/Social_graph
 ]
 ???
+As with other problems - big data graphs are like HPC graphs, but more so.
+
 For graphs in physical science simulation - say unstructured grids -
 or analysis, nodes typically have say within a factor of two or order of
 magnitude the same number of neighbours.
 
-Not so with s(say0 social media graphs:
+Not so with (say) social media graphs:
+Very sparse, very irregular: nodes can have enormously varying degrees
 
 Inexplicably, Justin Bieber has far more twice as many followers
 as I do on twitter
@@ -556,10 +591,6 @@ Generally decomposed in similar ways.
 
 Processing looks very much like neighbour exchange on an unstructured mesh; can
 map unstructured mesh computations onto (very regular) graph problems.
-
-If anything, these
-[Pregel](https://blog.acolyer.org/2015/05/26/pregel-a-system-for-large-scale-graph-processing/)-type
-graph methods might be a little naive - overly synchronous.
 
 .center[<img src="assets/img/flink-sssp.png" width=75%></img>]
 https://flink.apache.org/news/2015/08/24/introducing-flink-gelly.html
@@ -582,7 +613,7 @@ Calculations on (_e.g._) social graphs are typically very low-compute intensity:
 So that big-data graph computations are often _more_ latency sensitive than 
 more compute-intensive technical computations
 
-&rArr; lots of work done to reduce communication/framework overhead
+&rArr; lots of work done and in progresss to reduce communication/framework overhead
 
 .center[<img src="assets/img/graphx-tables_and_graphs.png" width=75%></img>]
 https://spark.apache.org/docs/1.2.1/graphx-programming-guide.html
@@ -637,7 +668,7 @@ Hadoop came out in ~2006 with MapReduce as a computational engine, which wasn't 
 However, the ecosystem flourished, particularly around the Hadoop file system (HDFS) and new databases
 and processing packages that grew up around it.
 
-.center[<img src="assets/img/mapreduce.png" height=400px></img>]
+.center[<img src="assets/img/mapreduce.png" height=350px></img>]
 ]
 ---
 .left-column[
@@ -672,12 +703,12 @@ Spark RDDs prove to be a very powerful abstraction.
 
 Key-Value RDDs are a special case - a pair of values, first is key, second is value associated with.
 
+Linda tuple spaces, which underly Gaussian.
+
 Can easily use join, _etc._ to bring all values associated with a key together:
   - Like all stencil terms that are contribute at a particular grid point
   
-Linda tuple spaces, which underly Gaussian.
-
-.center[<img src="assets/img/spark-rdds-diffusion.png" width=60%></img>]
+.center[<img src="assets/img/spark-rdds-diffusion.png" width=55%></img>]
 ]
 ---
 .left-column[
@@ -726,6 +757,9 @@ So for instance here, nothing starts happening in earnest until the `plot_data()
     # Plot final results in black
     plot_data(data, usecolor='black')
 ```
+
+Knowledge of lineage of every shard of data also means recomputation is straightforward in case
+of node failure
 ]
 ---
 .left-column[
@@ -764,7 +798,7 @@ Can use SQL-like queries to perform calculations.  But this allows bringing the 
 ### Graphs
 ]
 .right-column[
-Using RDDs, a graph library has also been implemented: GraphX.
+Graph library &mdash; [GraphX](http://spark.apache.org/graphx/) &mdash; has also been implemented on top of RDDs.
 
 Many interesting features, but for us: [Pregel](http://blog.acolyer.org/2015/05/26/pregel-a-system-for-large-scale-graph-processing/)-like algorithms on graphs.
 
@@ -808,6 +842,13 @@ def step(g:Graph[nodetype, edgetype]) : Graph[nodetype, edgetype] = {
 
 .center[<img src="assets/img/graphx-init.png" width=33%></img> <img src="assets/img/graphx-final.png" width=33%></img>]
 ]
+???
+This makes implementing unstructured mesh methods extremely straightforward, and there's 
+a little example with the talk that implements one in 50 lines of code or so.  
+
+The argument, to be clear, isn't that this is researchers should be doing unstructured
+mesh codes; the argument is that the problems these tools are solving for their users
+aren't some completely alien and irrelevant forms of analyses.
 ---
 .left-column[
 ## Spark
@@ -825,13 +866,18 @@ def step(g:Graph[nodetype, edgetype]) : Graph[nodetype, edgetype] = {
 ### Adoption
 ]
 .right-column[
-Adoption has been enormous in industry and elsewhere
+Adoption has been rapid and substantial
 - Biggest open-source big-data platform
 - Huge private-sector adoption, which has been hard for HPC
-- Selected in industry because of performance
+- Selected in industry because of performance and ease of use
 .center[<img src="assets/img/spark-business-uptake.png" width=75%></img>]
 .center[http://insidebigdata.com/2015/11/17/why-is-apache-spark-so-hot/]
 ]
+???
+Adoption has been rapid and substantial
+- Biggest open-source big-data platform
+- Huge private-sector adoption, which has been hard for HPC
+- Selected in industry because of performance and ease of use
 ---
 .left-column[
 ## Spark
@@ -892,6 +938,17 @@ Adoption has been enormous
 ???
 Looking over Spark, it's easy to see some Pros and Cons (from the point of view of _our_ use cases; 
 Spark has been designed and optimized for its community, and Big Data users would have a different list of Pros/Cons)
+
+A big one from our point of view is that the relatively heavyweight infrastructure around individual Spark processes
+means that it scales *down* fairly poorly.
+
+But the point here isn't that I'm proposing that our simulation
+codes should be rewritten in Spark - that would be silly.  
+
+The point is that other communities are building high-productivity tools for
+doing number-crunching for a user community that cares a great deal
+about performance and scale - not least of which because they pay real money
+for cycles - and they're not building it on top of MPI.
 ---
 class: center, middle, inverse
 count: false
@@ -907,17 +964,15 @@ Dask is a python parallel computing package
 
 * Very new - 2015
 * As small as possible
+* Scales down very nicely
 * Works very nicely with NumPy, Pandas, Scikit-Learn
-* Is definitely eating into MPI "market share"
+* Is definitely nibbling into MPI "market share"
     * For traditional numerical computing on few nodes
     * For less regular data analysis/machine learning on large scale
-    * (And likely siphoning off a little uptake of Spark)
-* Scales "down" very nicely
+    * (likely siphoning off a little uptake of Spark, too)
 
 Used for very general data analysis (linear algebra, trees, tables, stats, graphs...) and
 machine learning
-
-http://dask.pydata.org
 ]
 ---
 .left-column[
@@ -1072,18 +1127,18 @@ will be instantly famiilar to HPC community members
 
 * Performance: Aimed at analysis tasks (big, more loosely coupled) rather than simulation
     * Scheduler+TCP: 200&mu;s per-task overhead, orders of magnitude larger than an MPI message
-    * Not a replacement in general for tightly-coupled computing
+    * Not a replacement in general for large-scale tightly-coupled computing
     * Python
 
 **Pros**
 
 * Trivial to install, start using
-* Automatically overlaps communication with computation: 200&mu;s might not be so bad for some methods
-* Out-of-core support very useful
 * Outstanding for prototyping parallel algorithms
-* With Numba, Numpy, very reasonable performance at few node scales
+* Out-of-core support baked in
+* With Numba+Numpy, very reasonable single-core performance 
+* Automatically overlaps communication with computation: 200&mu;s might not be so bad for some methods
 * Scheduler, communications all in pure python right now, rapidly evolving:
-    * Much scope for speedup
+    * **Much** scope for speedup
 ]
 ---
 class: center, middle, inverse
@@ -1282,6 +1337,15 @@ array calculations
 * GPU, CPU support, not unreasonable to expect Phi support shortly
 * Great for data processing, image processing, or computations on n-d arrays
 ]
+???
+This one is a little closer to our wheelhouse.  Computationally-intensive
+operations on n-dimensional arrays of floating point values,
+communicating the results of those computaions, CPU and GPU, C++.
+
+Very nice high-productivity layer above the hard-core numerics.
+
+Performance is very important for these computations - but again, the underlying
+data transport is very definitely not MPI.
 ---
 layout: false
 class: center, middle, inverse
@@ -1414,7 +1478,7 @@ like distributed tree walks simply, too:
 ### Higher-Level Abstractions
 ]
 .right-column[
-MPI with collective operations and MPI-IO has taught us well-chosen higher-level abstractions provide:
+MPI &mdash; with collective operations and MPI-IO &mdash; has taught us well-chosen higher-level abstractions provide:
 
 - User: **both**:
     - higher performance (performance portability, autotuning)
@@ -1437,12 +1501,14 @@ Better deal for both.
 - Spark: Resilient distributed data set (table), upon which:
     - Graphs
     - Dataframes/Datasets
-    - Machine learning algorithms
+    - Machine learning algorithms (which require linear algebra)
+    - Mark of a good abstraction is you can build lots atop it!
 - Dask: 
     - Task Graph
     - Dataframe, array, bag operations
 - TensorFlow:
     - Data flow
+    - Certain kinds of &ldquo;Tensor&rdquo; operations
 - Chapel:
     - Domains
     - Locales
@@ -1476,7 +1542,8 @@ class: center, middle, inverse
 ## Data layers
 ]
 .right-column[
-Programming models like above would be useful for our scientists!
+Even if you don't like the particular ones listed, programming
+models/environments like above would be useful for our scientists!
 
 The ones above are tuned for iterative data analysis
 - Less tightly coupled than much HPC simulation
@@ -1484,7 +1551,7 @@ The ones above are tuned for iterative data analysis
 - And science has a lot of data analysis to do anyway
 
 They aren't competitors for MPI, they're the sort of things we'd like
-to have implemented atop MPI
+to have implemented atop MPI, even if we didn't use them ourselves.
 
 &rArr; Worth examining the data-movement layers of these stacks to
 see what features they require in a communications framework.
@@ -1533,7 +1600,14 @@ object PingPongTest extends App {
 http://alvinalexander.com/scala/scala-akka-actors-ping-pong-simple-example
 ]
 ???
+Are people here familiar with Erlang?
+
+Erlang is a message-passing language from Ericsson that went open-source at about the same time as MPI
+became available.  It's widely used in telecommunications, and other soft-real-time systems like many
+control systems.  The soft-real-time community cares a lot about latency, but also about fault tolerance.
+
 Erlang is a functional programming language with asyncronous, active message passing that triggers actions via pattern matching.
+
 We can see an example with this simple ping-pong example in Akka.  If the "Ping" actor gets a start message, 
 it sends a Ping message to the pong actor; if it gets a pong back, it either pings again or exits after enouugh iterations.
 ---
@@ -1974,7 +2048,7 @@ Could be a network-agnostic standard not just in HPC but elsewhere
 ### Algorithms 
 ]
 .right-column[
-Collectives under nonreliable transport
+Collectives over nonreliable transport
 
 What does something like Dask or Spark &mdash; maybe built on MPI-4 &mdash; look like when dealing with NVM?
 - External-memory algorithms become cool again!
