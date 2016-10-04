@@ -3,7 +3,10 @@
 This is the presentation and associated materials for [my talk](http://www.eurompi2016.ed.ac.uk/keynotes#dursi)
 at EuroMPI 2016.
 
-Included are the presentation materials (which can be viewed at http://ljdursi.github.io/EuroMPI2016), the [examples](./examples) and [VMs](./vms) to run them for all code samples.
+Included are the presentation materials (which can be viewed at
+http://ljdursi.github.io/EuroMPI2016 or as a [PDF](./presentation.pdf) ),
+the [examples](./examples) and [VMs](./vms) to run them for all
+code samples.
 
 Covered are a broad selection of widely used tools in the current large-scale numerical computing landscape:
 * [Spark/GraphX](http://spark.apache.org) - a giant in the big data space
